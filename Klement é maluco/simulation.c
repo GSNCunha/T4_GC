@@ -84,9 +84,9 @@ void *simulation(void *sdptr) {
         getCurrentTime(&t);
 
         
-        while ((mes = SCMQdequeue(incomingQueue)) != NULL) { //enquanto a mensagem for 
+        while ((mes = SCMQdequeue(incomingQueue)) != NULL) { //enquanto há mensagens para serem lidas e executadas
 
-            if (mes->messageType == START) {
+            if (mes->messageType == START) {//se a mensagem for de começo de simulação pegamos as condições iniciais
                 getCurrentTime(&t_start);
                 t = t_start;
 
@@ -99,7 +99,7 @@ void *simulation(void *sdptr) {
                 puts("[SIMULATION] Started");
                 continue;
             }
-            //Handles other messages.
+            //as mudanças de angulo de entrada ja estão inclusas na estrutura da mensagem, nos campos deltaAngle
             else if (*started) {
                 switch (mes->messageType) {
                     case OPEN_VALVE:
@@ -117,7 +117,7 @@ void *simulation(void *sdptr) {
             }
         }
 
-        //If simulation hasn't started, continue.
+        //Se não existem mensagens para serem lidas, vamos vicar atualizando os valores de angulos e nivel.
         if (!(*started)) continue;
 
         //Calculates next values.
@@ -127,7 +127,7 @@ void *simulation(void *sdptr) {
         nextOutflux = (max/100)*(nextLevel/1.25+0.2)*sin(M_PI/2*nextAngleOut/100);
         nextLevel += 0.00002*deltaMs*(nextInflux-nextOutflux);
 
-        //Assigns next values to shared variables.
+        //trava as variáveis de nivel e as altera a partir da simulação da planta
         pthread_mutex_lock(levelLock);
         *level = nextLevel;
         pthread_mutex_unlock(levelLock);
