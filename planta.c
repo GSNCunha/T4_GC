@@ -48,6 +48,28 @@ void *simulate_plant() {
     simulationTime = 0; // em ms
     startSimulationTime = clock(); //pega o clock do inicio
     buffer_put(&Start_scb, 0);
+    
+        while(1)
+    {
+        MessageData DataReceived;
+
+        DataReceived = buffer_get_MessageData(&messageData_scb);
+
+        if (strlen(DataReceived.keyword) > 0) {  // Ensure the keyword is not empty
+            if (strcmp(DataReceived.keyword, "Start") == 0) {
+                anguloIn = 50;
+                level = 40;
+                simulationTime = 0;
+                buffer_put(&Start_scb, 1);
+                break;
+            }
+        }
+    buffer_put(&nivel_scb, 40);
+    buffer_put(&tempo_scb, 0);
+    buffer_put(&angleIn_scb, 50);
+    buffer_put(&angleOut_scb, 50);
+
+    }
 
     while (1) {
 
