@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <math.h>
+#include "buffer_code.h"
+#include "timer_utils.h"
 
 #define SCREEN_W 640 //tamanho da janela que sera criada
 #define SCREEN_H 640
@@ -42,12 +44,12 @@ typedef struct dataholder {
 
 } Tdataholder;
 
-inline void c_pixeldraw(Tcanvas *canvas, int x, int y, PixelType color)
+void c_pixeldraw(Tcanvas *canvas, int x, int y, PixelType color)
 {
   *( ((PixelType*)canvas->canvas->pixels) + ((-y+canvas->Yoffset) * canvas->canvas->w + x+ canvas->Xoffset)) = color;
 }
 
-inline void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
+void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
 {
   int offset =  (-y+canvas->Yoffset) * canvas->canvas->w;
   int x;
@@ -57,7 +59,7 @@ inline void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
   }
 }
 
-inline void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
+void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
 {
   int offset = x+canvas->Xoffset;
   int y;
@@ -69,7 +71,7 @@ inline void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
 }
 
 
-inline void c_linedraw(Tcanvas *canvas, double x0, double y0, double x1, double y1, PixelType color) {
+void c_linedraw(Tcanvas *canvas, double x0, double y0, double x1, double y1, PixelType color) {
   double x;
 
   for (x=x0; x<=x1; x+=canvas->Xstep) {
@@ -141,9 +143,6 @@ void setdatacolors(Tdataholder *data, PixelType Lcolor, PixelType INcolor, Pixel
   data->OUTcolor=OUTcolor;
 }
 
-
-
-
 void datadraw(Tdataholder *data, double time, double level, double inangle, double outangle) {
   c_linedraw(data->canvas,data->Tcurrent,data->Lcurrent,time,level,data->Lcolor);
   c_linedraw(data->canvas,data->Tcurrent,data->INcurrent,time,inangle,data->INcolor);
@@ -178,15 +177,27 @@ void quitevent() {
 //
 //
 
-int main( int argc, const char* argv[] ) {
+
+void *plot_graph() {
   Tdataholder *data;
   double t=0;
+  double lvl;
+  double angleIn;
+  double angleOut;
 
-  data = datainit(640,480,55,110,45,0,0);
+  data = datainit(640,480,120,110,45,0,0);
 
-  for (t=0;t<50;t+=0.1) {
-    datadraw(data,t,(double)(50+20*cos(t/5)),(double)(70+10*sin(t/10)),(double)(20+5*cos(t/2.5)));
-  }
+    while (1) {
+        while (nivel_cb.count > 0 || tempo_cb.count > 0 || angleIn_cb.count > 0 || angleOut_cb.count > 0) {
+            t = buffer_get(&tempo_cb) / 1000;
+            lvl = buffer_get(&nivel_cb);
+            angleIn = buffer_get(&angleIn_cb);
+            angleOut = buffer_get(&angleOut_cb);
+            datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
+        }
+        sleepMs(50);
+    }
+
 
   while(1) {
     quitevent();

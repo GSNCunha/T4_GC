@@ -11,6 +11,10 @@ o server precisa plotar o nivel, var de entrada e de saídaa cada 50ms
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+
+#include "timer_utils.h"
+#include "buffer_code.h"
 
 #define M_PI 3.14159265358979323846
 #define PLANT_PERIOD 10
@@ -23,14 +27,9 @@ double anguloOut;
 double dT = 10; //em ms
 double fluxIn;
 double fluxOut;
+long simulationTime;
 
-struct DataPlant {
-    int newMsg;
-    char keyword[100]; // open valve etc.
-    int seq;
-    int value;
-    double level;
-};
+clock_t startSimulationTime;
 
 int get_angle_out(long T) { // T em ms
     if(T <= 0) return 50;
@@ -42,77 +41,73 @@ int get_angle_out(long T) { // T em ms
     return 50; // Default return if T > 100000
 }
 
-void *simulate_plant(struct DataPlant *DataReceived) {
-    long simulationTime = 0; // em ms
-    struct timespec start, end, sleepTime, elapsed;
+void *simulate_plant() {
+
+    //catches the start of the simulation:
+    simulationTime = 0; // em ms
+    startSimulationTime = clock(); //pega o clock do inicio
 
     while (1) {
-        // Get the start time
-        clock_gettime(CLOCK_MONOTONIC, &start);
 
-        if (DataReceived != NULL) {
-            if (strcmp(DataReceived->keyword, "OpenValve") == 0) {
-                delta += DataReceived->value;
-            } else if (strcmp(DataReceived->keyword, "CloseValve") == 0) {
-                delta -= DataReceived->value;
-            } else if (strcmp(DataReceived->keyword, "SetMax") == 0) {
-                max = DataReceived->value;
-            }
+    /*Message DataReceived;
 
-            if (delta > 0) {
-                if (delta < 0.01 * dT) {
-                    anguloIn = anguloIn + delta;
-                    delta = 0;
-                } else {
-                    anguloIn = anguloIn + 0.01 * dT;
-                    delta -= 0.01 * dT;
-                }
-            } else if (delta < 0) {
-                if (delta > -0.01 * dT) {
-                    anguloIn = anguloIn + delta;
-                    delta = 0;
-                } else {
-                    anguloIn = anguloIn - 0.01 * dT;
-                    delta += 0.01 * dT;
-                }
-            }
+    buffer_get_string(&command_cb, &DataReceived);
 
-            if (strcmp(DataReceived->keyword, "Start") == 0) {
-                simulationTime = 0;
-                anguloIn = 50;
-                level = 0.4;
-            }
+    if (strlen(DataReceived.keyword) > 0) {  // Ensure the keyword is not empty
+        if (strcmp(DataReceived.keyword, "OpenValve") == 0) {
+            delta += DataReceived.value;
+        } else if (strcmp(DataReceived.keyword, "CloseValve") == 0) {
+            delta -= DataReceived.value;
+        } else if (strcmp(DataReceived.keyword, "SetMax") == 0) {
+            max = DataReceived.value;
+        } else if (strcmp(DataReceived.keyword, "GetLevel") == 0) {
+            // Handle GetLevel case if necessary
+        } else if (strcmp(DataReceived.keyword, "Start") == 0) {
+            // Handle Start case if necessary
         }
+    }*/
 
-        if (simulationTime == 0) {
-            anguloIn = 50;
-            level = 0.4;
+    if (delta > 0) {
+        if (delta < 0.01 * dT) {
+            anguloIn = anguloIn + delta;
+            delta = 0;
+        } else {
+            anguloIn = anguloIn + 0.01 * dT;
+            delta -= 0.01 * dT;
         }
-
-        fluxIn = 1 * sin(M_PI / 2 * anguloIn / 100);
-        fluxOut = (max / 100) * (level / 1.25 + 0.2) * sin(M_PI / 2 * anguloOut / 100);
-        level = level + 0.00002 * dT * (fluxIn - fluxOut);
-
-        // Get the end time
-        clock_gettime(CLOCK_MONOTONIC, &end);
-
-        // Calculate the elapsed time
-        elapsed.tv_sec = end.tv_sec - start.tv_sec;
-        elapsed.tv_nsec = end.tv_nsec - start.tv_nsec;
-        if (elapsed.tv_nsec < 0) {
-            elapsed.tv_sec -= 1;
-            elapsed.tv_nsec += 1000000000L;
+    } else if (delta < 0) {
+        if (delta > -0.01 * dT) {
+            anguloIn = anguloIn + delta;
+            delta = 0;
+        } else {
+            anguloIn = anguloIn - 0.01 * dT;
+            delta += 0.01 * dT;
         }
+    }
 
-        // Calculate the remaining time to sleep
-        sleepTime.tv_sec = 0;
-        sleepTime.tv_nsec = PLANT_PERIOD * 1000000L - elapsed.tv_nsec;
+   /* if (strcmp(DataReceived.keyword, "Start") == 0) {
+        simulationTime = 0;
+        anguloIn = 50;
+        level = 0.4;
+    }*/
+    
+    if (simulationTime == 0) {
+        anguloIn = 50;
+        level = 40;
+    }
 
-        // Sleep for the remaining time if any
-        if (sleepTime.tv_nsec > 0) {
-            nanosleep(&sleepTime, NULL);
-        }
+    fluxIn = 1 * sin(M_PI / 2 * anguloIn / 100);
+    fluxOut = (max / 100) * (level / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
+    level = level + 0.00002 * dT * (fluxIn - fluxOut);
 
-        simulationTime += PLANT_PERIOD;
+    buffer_put(&nivel_cb, level);
+    buffer_put(&tempo_cb, simulationTime);
+    buffer_put(&angleIn_cb, anguloIn);
+    buffer_put(&angleOut_cb, get_angle_out(simulationTime));
+
+    sleepMs(10);
+
+    simulationTime += PLANT_PERIOD;
     }
 }
+
