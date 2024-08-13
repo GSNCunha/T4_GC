@@ -29,6 +29,7 @@ typedef struct {
     pthread_cond_t not_full;
 } circular_buffer_string;
 
+
 typedef struct {
     char keyword[50];
     int seq;
@@ -36,6 +37,7 @@ typedef struct {
     bool has_seq;
     bool has_value;
 } Message;
+
 
 circular_buffer nivel_cb;
 circular_buffer tempo_cb;

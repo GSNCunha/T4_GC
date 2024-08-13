@@ -38,7 +38,7 @@ int get_angle_out(long T) { // T em ms
     if(T <= 50000) return (100 - (T - 30000) / 250);
     if(T <= 70000) return (20 + (T - 50000) / 1000);
     if(T <= 100000) return (40 + 20 * cos((T - 70000) * 2 * M_PI / 10000));
-    return 50; // Default return if T > 100000
+    return 100; // Default return if T > 100000
 }
 
 void *simulate_plant() {
