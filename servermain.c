@@ -16,6 +16,7 @@ int main(){
     buffer_init(&tempo_cb);
     buffer_init(&angleIn_cb);
     buffer_init(&angleOut_cb);
+    buffer_init(&Start_cb);
     buffer_init_string(&command_cb);
     buffer_init_MessageData(&messageData_cb);
 

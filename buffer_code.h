@@ -61,6 +61,7 @@ extern circular_buffer nivel_cb;
 extern circular_buffer tempo_cb;
 extern circular_buffer angleIn_cb;
 extern circular_buffer angleOut_cb;
+extern circular_buffer Start_cb;
 extern circular_buffer_string command_cb;
 extern circular_buffer_MessageData messageData_cb;
 

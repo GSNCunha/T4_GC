@@ -21,13 +21,14 @@ o server precisa plotar o nivel, var de entrada e de saídaa cada 50ms
 
 double delta;
 double max;
-double level;
-double anguloIn;
+double level = 40;
+double anguloIn = 50;
 double anguloOut;
 double dT = 10; //em ms
 double fluxIn;
 double fluxOut;
-long simulationTime;
+long simulationTime = 0;
+
 
 clock_t startSimulationTime;
 
@@ -46,6 +47,7 @@ void *simulate_plant() {
     //catches the start of the simulation:
     simulationTime = 0; // em ms
     startSimulationTime = clock(); //pega o clock do inicio
+    buffer_put(&Start_cb, 0);
 
     while (1) {
 
@@ -76,15 +78,13 @@ void *simulate_plant() {
         } else if (strcmp(DataReceived.keyword, "SetMax") == 0) {
             max = DataReceived.value;
         } else if (strcmp(DataReceived.keyword, "GetLevel") == 0) {
-            // Handle GetLevel case if necessary
+            // resposta foi dada em serverUDP
         } else if (strcmp(DataReceived.keyword, "Start") == 0) {
-            // Handle Start case if necessary
+            anguloIn = 50;
+            level = 40;
+            simulationTime = 0;
+            buffer_put(&Start_cb, 1);
         }
-    }
-    
-    if (simulationTime == 0) {
-        anguloIn = 50;
-        level = 40;
     }
 
     fluxIn = 1 * sin(M_PI / 2 * anguloIn / 100);

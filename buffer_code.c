@@ -53,6 +53,7 @@ circular_buffer nivel_cb;
 circular_buffer tempo_cb;
 circular_buffer angleIn_cb;
 circular_buffer angleOut_cb;
+circular_buffer Start_cb;
 circular_buffer_string command_cb;
 circular_buffer_string message_cb;
 circular_buffer_MessageData messageData_cb; // Buffer for MessageData
@@ -114,16 +115,21 @@ void buffer_put(circular_buffer *cb, double item) {
 
 double buffer_get(circular_buffer *cb) {
     pthread_mutex_lock(&cb->lock);
-    while (cb->count == 0) {
-        pthread_cond_wait(&cb->not_empty, &cb->lock);
+    if (cb->count == 0) {
+        // Buffer is empty, return a special value
+        pthread_mutex_unlock(&cb->lock);
+        return 0;  // Or any other special value that indicates "nothing to read"
     }
+    
     double item = cb->buffer[cb->head];
     cb->head = (cb->head + 1) % BUFFER_SIZE;
     cb->count--;
     pthread_cond_signal(&cb->not_full);
     pthread_mutex_unlock(&cb->lock);
+    
     return item;
 }
+
 
 void buffer_init_MessageData(circular_buffer_MessageData *cb) {
     cb->head = 0;

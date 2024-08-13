@@ -169,6 +169,31 @@ void quitevent() {
 
 }
 
+void reset_simulation(Tdataholder *data) {
+    // Reset the simulation parameters
+    data->Tcurrent = 0;
+    data->Lcurrent = 100; // Set an appropriate initial value
+    data->INcurrent = 50;
+    data->OUTcurrent = 50;
+
+    // Clear the screen
+    SDL_FillRect(data->canvas->canvas, NULL, SDL_MapRGB(data->canvas->canvas->format, 0, 0, 0));
+
+    // Redraw the grid lines
+    c_hlinedraw(data->canvas, 1, 0, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 255, 255, 255));
+    for (int y = 10; y < data->canvas->Ymax; y += 10) {
+        c_hlinedraw(data->canvas, 3, y * data->canvas->Height / data->canvas->Ymax, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 220, 220, 220));
+    }
+    c_vlinedraw(data->canvas, 0, 1, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 255, 255, 255));
+    for (int x = 10; x < data->canvas->Xmax; x += 10) {
+        c_vlinedraw(data->canvas, x * data->canvas->Width / data->canvas->Xmax, 3, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 220, 220, 220));
+    }
+
+    // Update the screen
+    SDL_Flip(data->canvas->canvas);
+}
+
+
 //
 //
 //
@@ -194,6 +219,11 @@ void *plot_graph() {
             angleIn = buffer_get(&angleIn_cb);
             angleOut = buffer_get(&angleOut_cb);
             datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
+        }
+        if(buffer_get(&Start_cb) == 1)
+        {
+          buffer_put(&Start_cb, 0);
+          reset_simulation(data);
         }
         sleepMs(50);
     }

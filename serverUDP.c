@@ -115,7 +115,9 @@ void construct_response(const MessageData *data, char *response) {
             sprintf(response, "Err!");
         }
     } else if (strcmp(data->keyword, "GetLevel") == 0) {
-        sprintf(response, "Level#80!");  // Assuming 80% as an example
+    double nivel_atual = buffer_get(&nivel_cb);
+
+    sprintf(response, "Level#%f!", nivel_atual);
     } else if (strcmp(data->keyword, "CommTest") == 0) {
         sprintf(response, "Comm#OK!");
     } else if (strcmp(data->keyword, "SetMax") == 0) {
