@@ -20,7 +20,7 @@ o server precisa plotar o nivel, var de entrada e de saídaa cada 50ms
 #define PLANT_PERIOD 10
 
 double delta;
-double max;
+double max = 100;
 double level = 40;
 double anguloIn = 50;
 double anguloOut;
@@ -94,8 +94,8 @@ void *simulate_plant() {
     }
 
     fluxIn = 1 * sin(M_PI / 2 * anguloIn / 100);
-    fluxOut = (max / 100) * (level / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
-    level = level + 0.00002 * dT * (fluxIn - fluxOut);
+    fluxOut = (max / 100) * (level/100 / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
+    level = level + 100*(0.00002 * dT * (fluxIn - fluxOut));
 
     buffer_put(&nivel_scb, level);
     buffer_put(&tempo_scb, simulationTime);
