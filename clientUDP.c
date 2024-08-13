@@ -22,17 +22,16 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   
-  
   /* Create the UDP socket */
   if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
     Die("Failed to create socket");
   }
+  
   /* Construct the server sockaddr_in structure */
   memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
   echoserver.sin_family = AF_INET;                  /* Internet/IP */
   echoserver.sin_addr.s_addr = inet_addr(argv[1]);  /* IP address */
   echoserver.sin_port = htons(atoi(argv[3]));       /* server port */
-  
   
   /* Send the word to the server */
   echolen = strlen(argv[2]);
@@ -42,24 +41,23 @@ int main(int argc, char *argv[]) {
     Die("Mismatch in number of sent bytes");
   }
   
-  
   /* Receive the word back from the server */
   fprintf(stdout, "Received: ");
   clientlen = sizeof(echoclient);
   if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
 			   (struct sockaddr *) &echoclient,
-			   &clientlen)) != echolen) {
-    Die("Mismatch in number of received bytes");
+			   &clientlen)) < 0) {
+    Die("Failed to receive bytes from server");
   }
-  /* Check that client and server are using same socket */
+  
+  /* Check that client and server are using the same socket */
   if (echoserver.sin_addr.s_addr != echoclient.sin_addr.s_addr) {
     Die("Received a packet from an unexpected server");
   }
+  
   buffer[received] = '\0';        /* Assure null terminated string */
-  fprintf(stdout, buffer);
-  fprintf(stdout, "\n");
+  fprintf(stdout, "%s\n", buffer);
+  
   close(sock);
   exit(0);
 }
-
-
