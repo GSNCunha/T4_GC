@@ -17,6 +17,7 @@ int main(){
     buffer_init(&angleIn_cb);
     buffer_init(&angleOut_cb);
     buffer_init_string(&command_cb);
+    buffer_init_MessageData(&messageData_cb);
 
     pthread_create(&plant_server, NULL, simulate_plant, NULL);
     pthread_create(&graph_server, NULL, plot_graph, NULL);

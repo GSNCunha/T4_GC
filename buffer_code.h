@@ -1,5 +1,5 @@
-#ifndef CIRCULAR_BUFFER_H
-#define CIRCULAR_BUFFER_H
+#ifndef BUFFER_H
+#define BUFFER_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,11 +8,12 @@
 #include <stdbool.h>
 #include <string.h>
 
-// Definições de tamanho
 #define BUFFER_SIZE 10
 #define STRING_SIZE 50
+#define KEYWORD_SIZE 50
+#define RESPONSE_SIZE 10
 
-// Estrutura para buffer circular de double
+// Circular buffer for doubles
 typedef struct {
     double buffer[BUFFER_SIZE];
     int head;
@@ -23,7 +24,7 @@ typedef struct {
     pthread_cond_t not_full;
 } circular_buffer;
 
-// Estrutura para buffer circular de string
+// Circular buffer for strings
 typedef struct {
     char buffer[BUFFER_SIZE][STRING_SIZE];
     int head;
@@ -34,30 +35,46 @@ typedef struct {
     pthread_cond_t not_full;
 } circular_buffer_string;
 
-// Estrutura para armazenar mensagens
+// Struct to store message data
 typedef struct {
-    char keyword[50];
+    char keyword[KEYWORD_SIZE];
     int seq;
     int value;
     bool has_seq;
     bool has_value;
-} Message;
+    char response[RESPONSE_SIZE]; // Added to handle "OK" responses
+} MessageData;
 
+// Circular buffer for MessageData
+typedef struct {
+    MessageData buffer[BUFFER_SIZE];
+    int head;
+    int tail;
+    int count;
+    pthread_mutex_t lock;
+    pthread_cond_t not_empty;
+    pthread_cond_t not_full;
+} circular_buffer_MessageData;
 
+// Global buffer instances
 extern circular_buffer nivel_cb;
 extern circular_buffer tempo_cb;
 extern circular_buffer angleIn_cb;
 extern circular_buffer angleOut_cb;
 extern circular_buffer_string command_cb;
+extern circular_buffer_MessageData messageData_cb;
 
-
-// Declarações das funções
+// Function declarations
 void buffer_init_string(circular_buffer_string *cb);
 void buffer_put_string(circular_buffer_string *cb, const char *item);
-void buffer_get_string(circular_buffer_string *cb, Message *item);
+void buffer_get_string(circular_buffer_string *cb, char *item);
 
 void buffer_init(circular_buffer *cb);
 void buffer_put(circular_buffer *cb, double item);
 double buffer_get(circular_buffer *cb);
 
-#endif // CIRCULAR_BUFFER_H
+void buffer_init_MessageData(circular_buffer_MessageData *cb);
+void buffer_put_MessageData(circular_buffer_MessageData *cb, MessageData item);
+MessageData buffer_get_MessageData(circular_buffer_MessageData *cb);
+
+#endif // BUFFER_H

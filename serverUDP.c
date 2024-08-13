@@ -7,18 +7,11 @@
 #include <netinet/in.h>
 #include <stdbool.h>
 
+#include "buffer_code.h"
+
 #define BUFFSIZE 255
 #define KEYWORD_SIZE 50
 #define RESPONSE_SIZE 10  // Assuming this size for the response string
-
-typedef struct {
-    char keyword[KEYWORD_SIZE];
-    int seq;
-    int value;
-    bool has_seq;
-    bool has_value;
-    char response[RESPONSE_SIZE]; // Added to handle "OK" responses
-} MessageData;
 
 void Die(char *mess) { perror(mess); exit(1); }
 
@@ -181,6 +174,8 @@ void *start_server() {
             printf("Keyword: %s\n", data.keyword);
             printf("Seq: %d\n", data.seq);
             printf("Value: %d\n", data.value);
+
+            buffer_put_MessageData(&messageData_cb, data);
 
             // Construct the response based on the command
             construct_response(&data, response);

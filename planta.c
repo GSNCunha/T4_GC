@@ -49,15 +49,30 @@ void *simulate_plant() {
 
     while (1) {
 
-    /*Message DataReceived;
+    MessageData DataReceived;
 
-    buffer_get_string(&command_cb, &DataReceived);
+    DataReceived = buffer_get_MessageData(&messageData_cb);
+
 
     if (strlen(DataReceived.keyword) > 0) {  // Ensure the keyword is not empty
         if (strcmp(DataReceived.keyword, "OpenValve") == 0) {
             delta += DataReceived.value;
+            if (delta < 0.01 * dT) {
+                anguloIn = anguloIn + delta;
+                delta = 0;
+            } else {
+                anguloIn = anguloIn + 0.01 * dT;
+                delta -= 0.01 * dT;
+            }
         } else if (strcmp(DataReceived.keyword, "CloseValve") == 0) {
             delta -= DataReceived.value;
+            if (delta > -0.01 * dT) {
+                anguloIn = anguloIn + delta;
+                delta = 0;
+            } else {
+                anguloIn = anguloIn - 0.01 * dT;
+                delta += 0.01 * dT;
+            }
         } else if (strcmp(DataReceived.keyword, "SetMax") == 0) {
             max = DataReceived.value;
         } else if (strcmp(DataReceived.keyword, "GetLevel") == 0) {
@@ -65,31 +80,7 @@ void *simulate_plant() {
         } else if (strcmp(DataReceived.keyword, "Start") == 0) {
             // Handle Start case if necessary
         }
-    }*/
-
-    if (delta > 0) {
-        if (delta < 0.01 * dT) {
-            anguloIn = anguloIn + delta;
-            delta = 0;
-        } else {
-            anguloIn = anguloIn + 0.01 * dT;
-            delta -= 0.01 * dT;
-        }
-    } else if (delta < 0) {
-        if (delta > -0.01 * dT) {
-            anguloIn = anguloIn + delta;
-            delta = 0;
-        } else {
-            anguloIn = anguloIn - 0.01 * dT;
-            delta += 0.01 * dT;
-        }
     }
-
-   /* if (strcmp(DataReceived.keyword, "Start") == 0) {
-        simulationTime = 0;
-        anguloIn = 50;
-        level = 0.4;
-    }*/
     
     if (simulationTime == 0) {
         anguloIn = 50;
