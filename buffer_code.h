@@ -65,10 +65,20 @@ extern circular_buffer Start_scb;
 extern circular_buffer_string command_scb;
 extern circular_buffer_MessageData messageData_scb;
 
+extern circular_buffer nivel_controller;
+extern circular_buffer nivel_ccb;
+extern circular_buffer tempo_ccb;
+extern circular_buffer angleIn_ccb;
+extern circular_buffer angleOut_ccb;
+extern circular_buffer Start_ccb;
+extern circular_buffer delta_ccb;
+extern circular_buffer_string command_ccb;
+
+
 // Function declarations
 void buffer_init_string(circular_buffer_string *cb);
 void buffer_put_string(circular_buffer_string *cb, const char *item);
-void buffer_get_string(circular_buffer_string *cb, char *item);
+int buffer_get_string(circular_buffer_string *cb, char *item);
 
 void buffer_init(circular_buffer *cb);
 void buffer_put(circular_buffer *cb, double item);

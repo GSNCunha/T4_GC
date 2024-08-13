@@ -6,7 +6,6 @@
 
 #define SCREEN_W 640 //tamanho da janela que sera criada
 #define SCREEN_H 640
-#define M_PI 3.14159265358979323846
 
 //#define BPP 8
 //typedef Uint8 PixelType;
@@ -120,7 +119,6 @@ Tcanvas *c_open(int Width, int Height, double Xmax, double Ymax)
 }
 
 
-
 Tdataholder *datainit(int Width, int Height, double Xmax, double Ymax, double Lcurrent, double INcurrent, double OUTcurrent) {
   Tdataholder *data = malloc(sizeof(Tdataholder));
 
@@ -144,14 +142,12 @@ void setdatacolors(Tdataholder *data, PixelType Lcolor, PixelType INcolor, Pixel
   data->OUTcolor=OUTcolor;
 }
 
-void datadraw(Tdataholder *data, double time, double level, double inangle, double outangle) {
+void datadraw(Tdataholder *data, double time, double level, double inangle) {
   c_linedraw(data->canvas,data->Tcurrent,data->Lcurrent,time,level,data->Lcolor);
   c_linedraw(data->canvas,data->Tcurrent,data->INcurrent,time,inangle,data->INcolor);
-  c_linedraw(data->canvas,data->Tcurrent,data->OUTcurrent,time,outangle,data->OUTcolor);
   data->Tcurrent = time;
   data->Lcurrent = level;
   data->INcurrent = inangle;
-  data->OUTcurrent = outangle;
 
   SDL_Flip(data->canvas->canvas);
 }
@@ -203,27 +199,27 @@ void reset_simulation(Tdataholder *data) {
 //
 //
 
-
 void *plot_graph() {
   Tdataholder *data;
   double t=0;
   double lvl;
   double angleIn;
-  double angleOut;
+  double tempo = 0;
 
   data = datainit(640,480,120,110,45,0,0);
 
     while (1) {
-        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
-            t = buffer_get(&tempo_scb) / 1000;
-            lvl = 100*buffer_get(&nivel_scb);
-            angleIn = buffer_get(&angleIn_scb);
-            angleOut = buffer_get(&angleOut_scb);
-            datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
+      tempo += 50;
+        while (nivel_ccb.count > 0 || tempo_ccb.count > 0 || angleIn_ccb.count > 0) {
+            t = tempo/1000;
+            lvl = 100*buffer_get(&nivel_ccb);
+            angleIn = 50;
+            datadraw(data, t, (double)lvl, (double)angleIn);
         }
-        if(buffer_get(&Start_scb) == 1)
+        if(buffer_get(&Start_ccb) == 1)
         {
-          buffer_put(&Start_scb, 0);
+          tempo = 0;
+          buffer_put(&Start_ccb, 0);
           reset_simulation(data);
         }
         sleepMs(50);

@@ -1,7 +1,7 @@
 // graphics.h
 
-#ifndef GRAPH_SERVER_H
-#define GRAPH_SERVER_H
+#ifndef GRAPH_CLIENT_H
+#define GRAPH_CLIENT_H
 
 #include <SDL/SDL.h>
 #include <math.h>

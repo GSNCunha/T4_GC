@@ -58,6 +58,17 @@ circular_buffer_string command_scb;
 circular_buffer_string message_scb;
 circular_buffer_MessageData messageData_scb; // Buffer for MessageData
 
+circular_buffer nivel_ccb;
+circular_buffer tempo_ccb;
+circular_buffer angleIn_ccb;
+circular_buffer angleOut_ccb;
+circular_buffer Start_ccb;
+circular_buffer_string command_ccb;
+circular_buffer_string message_ccb;
+circular_buffer delta_ccb;
+circular_buffer_MessageData messageData_ccb; // Buffer for MessageData
+circular_buffer nivel_controller;
+
 void buffer_init_string(circular_buffer_string *cb) {
     cb->head = 0;
     cb->tail = 0;
@@ -80,16 +91,19 @@ void buffer_put_string(circular_buffer_string *cb, const char *item) {
     pthread_mutex_unlock(&cb->lock);
 }
 
-void buffer_get_string(circular_buffer_string *cb, char *item) {
+int buffer_get_string(circular_buffer_string *cb, char *item) {
     pthread_mutex_lock(&cb->lock);
-    while (cb->count == 0) {
-        pthread_cond_wait(&cb->not_empty, &cb->lock);
+    if (cb->count == 0) {
+        // Buffer is empty, return a special value
+        pthread_mutex_unlock(&cb->lock);
+        return 0;  // Or any other special value that indicates "nothing to read"
     }
     strncpy(item, cb->buffer[cb->head], STRING_SIZE);
     cb->head = (cb->head + 1) % BUFFER_SIZE;
     cb->count--;
     pthread_cond_signal(&cb->not_full);
     pthread_mutex_unlock(&cb->lock);
+    return 1;
 }
 
 void buffer_init(circular_buffer *cb) {

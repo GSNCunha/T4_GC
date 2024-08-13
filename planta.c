@@ -1,11 +1,3 @@
-/*
-o client tem que ter acesso ao nivel por IP e mandar o controle por ip
-o client tem que ter acesso ao nivel ae a abertur atual da valvula para plotagem, a cada 50ms
-
-o server tem que simular a planta a cada 10ms
-o server precisa plotar o nivel, var de entrada e de saídaa cada 50ms
- */
-
 #include <math.h>
 #include <stdio.h>
 #include <time.h>
@@ -21,7 +13,7 @@ o server precisa plotar o nivel, var de entrada e de saídaa cada 50ms
 
 double delta;
 double max = 100;
-double level = 40;
+double level = 0.4;
 double anguloIn = 50;
 double anguloOut;
 double dT = 10; //em ms
@@ -54,17 +46,16 @@ void *simulate_plant() {
         MessageData DataReceived;
 
         DataReceived = buffer_get_MessageData(&messageData_scb);
-
         if (strlen(DataReceived.keyword) > 0) {  // Ensure the keyword is not empty
             if (strcmp(DataReceived.keyword, "Start") == 0) {
                 anguloIn = 50;
-                level = 40;
+                level =0.4;
                 simulationTime = 0;
                 buffer_put(&Start_scb, 1);
                 break;
             }
         }
-    buffer_put(&nivel_scb, 40);
+    buffer_put(&nivel_scb, 0.4);
     buffer_put(&tempo_scb, 0);
     buffer_put(&angleIn_scb, 50);
     buffer_put(&angleOut_scb, 50);
@@ -89,7 +80,7 @@ void *simulate_plant() {
             // resposta foi dada em serverUDP
         } else if (strcmp(DataReceived.keyword, "Start") == 0) {
             anguloIn = 50;
-            level = 40;
+            level = 0.4;
             simulationTime = 0;
             buffer_put(&Start_scb, 1);
         }
@@ -116,9 +107,10 @@ void *simulate_plant() {
     }
 
     fluxIn = 1 * sin(M_PI / 2 * anguloIn / 100);
-    fluxOut = (max / 100) * (level/100 / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
-    level = level + 100*(0.00002 * dT * (fluxIn - fluxOut));
-
+    fluxOut = (max / 100) * (level / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
+    level = level + (0.00002 * dT * (fluxIn - fluxOut));
+    if(level >=1)
+        level = 1;
     buffer_put(&nivel_scb, level);
     buffer_put(&tempo_scb, simulationTime);
     buffer_put(&angleIn_scb, anguloIn);

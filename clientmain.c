@@ -4,28 +4,51 @@
 #include <unistd.h>
 
 #include "buffer_code.h"
-#include "graph_server.h"
-#include "planta.h"
+#include "graph_client.h"
+#include "clientUDP.h"
+#include "controller.h"
 
 
-int main(){
-    pthread_t graph_server_client, udp_server_client, controller_server_client;
+int main(int argc, char *argv[]){
+    pthread_t graph_client, udp_client, controller_client; 
 
-    buffer_init(&nivel_scb);
-    buffer_init(&tempo_scb);
-    buffer_init(&angleIn_scb);
-    buffer_init(&angleOut_scb);
-    buffer_init(&Start_scb);
-    buffer_init_string(&command_scb);
-    buffer_init_MessageData(&messageData_scb);
+    if (argc != 3) {
+        fprintf(stderr, "USAGE: %s <server_ip> <port>\n", argv[0]);
+        exit(1);
+    }
 
-    pthread_create(&graph_server_client, NULL, simulate_plant, NULL);
-    pthread_create(&udp_server_client, NULL, plot_graph, NULL);
-    pthread_create(&controller_server_client, NULL, start_server, NULL);
+    buffer_init(&nivel_controller);
+    buffer_init(&nivel_ccb); //clientUDP - > graph_client
+    buffer_init(&tempo_ccb); //clientUDP - > graph_client
+    buffer_init(&angleIn_ccb); //controle - > graph_client
+    buffer_init(&Start_ccb); //clientUDP - > graph_client
+    buffer_init(&delta_ccb); //clientUDP - > graph_client
+    buffer_init_string(&command_ccb); //controle - > clientUDP
+    //buffer_init_string(&comman)
 
-    pthread_join(graph_server_client NULL);
-    pthread_join(udp_server_client, NULL);
-    pthread_join(controller_server_client, NULL);
+    pthread_create(&graph_client, NULL, plot_graph, NULL);
+    pthread_create(&controller_client, NULL, start_controller, NULL);
+    pthread_create(&udp_client, NULL, start_udp_client, (void *)&argv[1]);
+
+    while(1){
+        // Prompt the user to enter a message
+        printf("Enter message (or type 'exit' to quit): ");
+        char *buffer[100];
+        fgets(buffer, BUFFSIZE, stdin);
+        buffer[strcspn(buffer, "\n")] = 0;  // Remove the newline character
+
+        // Exit if the user types 'exit'
+        if (strcmp(buffer, "exit") == 0) {
+            break;
+            //fechar o bgl todo
+        }
+
+        buffer_put_string(&command_ccb,buffer);
+    }
+
+    pthread_join(graph_client, NULL);
+    pthread_join(udp_client, NULL);
+    //pthread_join(controller_client, NULL);
 
     return 0;
 }
