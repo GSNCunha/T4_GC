@@ -213,16 +213,16 @@ void *plot_graph() {
   data = datainit(640,480,120,110,45,0,0);
 
     while (1) {
-        while (nivel_cb.count > 0 || tempo_cb.count > 0 || angleIn_cb.count > 0 || angleOut_cb.count > 0) {
-            t = buffer_get(&tempo_cb) / 1000;
-            lvl = buffer_get(&nivel_cb);
-            angleIn = buffer_get(&angleIn_cb);
-            angleOut = buffer_get(&angleOut_cb);
+        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
+            t = buffer_get(&tempo_scb) / 1000;
+            lvl = buffer_get(&nivel_scb);
+            angleIn = buffer_get(&angleIn_scb);
+            angleOut = buffer_get(&angleOut_scb);
             datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
         }
-        if(buffer_get(&Start_cb) == 1)
+        if(buffer_get(&Start_scb) == 1)
         {
-          buffer_put(&Start_cb, 0);
+          buffer_put(&Start_scb, 0);
           reset_simulation(data);
         }
         sleepMs(50);

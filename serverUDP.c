@@ -115,7 +115,7 @@ void construct_response(const MessageData *data, char *response) {
             sprintf(response, "Err!");
         }
     } else if (strcmp(data->keyword, "GetLevel") == 0) {
-    double nivel_atual = buffer_get(&nivel_cb);
+    double nivel_atual = buffer_get(&nivel_scb);
 
     sprintf(response, "Level#%f!", nivel_atual);
     } else if (strcmp(data->keyword, "CommTest") == 0) {
@@ -177,7 +177,7 @@ void *start_server() {
             printf("Seq: %d\n", data.seq);
             printf("Value: %d\n", data.value);
 
-            buffer_put_MessageData(&messageData_cb, data);
+            buffer_put_MessageData(&messageData_scb, data);
 
             // Construct the response based on the command
             construct_response(&data, response);

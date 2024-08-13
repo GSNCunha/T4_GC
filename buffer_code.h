@@ -57,13 +57,13 @@ typedef struct {
 } circular_buffer_MessageData;
 
 // Global buffer instances
-extern circular_buffer nivel_cb;
-extern circular_buffer tempo_cb;
-extern circular_buffer angleIn_cb;
-extern circular_buffer angleOut_cb;
-extern circular_buffer Start_cb;
-extern circular_buffer_string command_cb;
-extern circular_buffer_MessageData messageData_cb;
+extern circular_buffer nivel_scb;
+extern circular_buffer tempo_scb;
+extern circular_buffer angleIn_scb;
+extern circular_buffer angleOut_scb;
+extern circular_buffer Start_scb;
+extern circular_buffer_string command_scb;
+extern circular_buffer_MessageData messageData_scb;
 
 // Function declarations
 void buffer_init_string(circular_buffer_string *cb);

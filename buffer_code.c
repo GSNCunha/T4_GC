@@ -49,14 +49,14 @@ typedef struct {
     pthread_cond_t not_full;
 } circular_buffer_MessageData;
 
-circular_buffer nivel_cb;
-circular_buffer tempo_cb;
-circular_buffer angleIn_cb;
-circular_buffer angleOut_cb;
-circular_buffer Start_cb;
-circular_buffer_string command_cb;
-circular_buffer_string message_cb;
-circular_buffer_MessageData messageData_cb; // Buffer for MessageData
+circular_buffer nivel_scb;
+circular_buffer tempo_scb;
+circular_buffer angleIn_scb;
+circular_buffer angleOut_scb;
+circular_buffer Start_scb;
+circular_buffer_string command_scb;
+circular_buffer_string message_scb;
+circular_buffer_MessageData messageData_scb; // Buffer for MessageData
 
 void buffer_init_string(circular_buffer_string *cb) {
     cb->head = 0;

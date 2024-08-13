@@ -47,34 +47,20 @@ void *simulate_plant() {
     //catches the start of the simulation:
     simulationTime = 0; // em ms
     startSimulationTime = clock(); //pega o clock do inicio
-    buffer_put(&Start_cb, 0);
+    buffer_put(&Start_scb, 0);
 
     while (1) {
 
     MessageData DataReceived;
 
-    DataReceived = buffer_get_MessageData(&messageData_cb);
+    DataReceived = buffer_get_MessageData(&messageData_scb);
 
 
     if (strlen(DataReceived.keyword) > 0) {  // Ensure the keyword is not empty
         if (strcmp(DataReceived.keyword, "OpenValve") == 0) {
             delta += DataReceived.value;
-            if (delta < 0.01 * dT) {
-                anguloIn = anguloIn + delta;
-                delta = 0;
-            } else {
-                anguloIn = anguloIn + 0.01 * dT;
-                delta -= 0.01 * dT;
-            }
         } else if (strcmp(DataReceived.keyword, "CloseValve") == 0) {
             delta -= DataReceived.value;
-            if (delta > -0.01 * dT) {
-                anguloIn = anguloIn + delta;
-                delta = 0;
-            } else {
-                anguloIn = anguloIn - 0.01 * dT;
-                delta += 0.01 * dT;
-            }
         } else if (strcmp(DataReceived.keyword, "SetMax") == 0) {
             max = DataReceived.value;
         } else if (strcmp(DataReceived.keyword, "GetLevel") == 0) {
@@ -83,7 +69,27 @@ void *simulate_plant() {
             anguloIn = 50;
             level = 40;
             simulationTime = 0;
-            buffer_put(&Start_cb, 1);
+            buffer_put(&Start_scb, 1);
+        }
+    }
+
+    if(delta >0)
+    {   
+        if (delta < 0.01 * dT) {
+            anguloIn = anguloIn + delta;
+            delta = 0;
+        } else {
+            anguloIn = anguloIn + 0.01 * dT;
+            delta -= 0.01 * dT;
+        }
+    }else if(delta <0)
+    {
+        if (delta > -0.01 * dT) {
+            anguloIn = anguloIn + delta;
+            delta = 0;
+        } else {
+            anguloIn = anguloIn - 0.01 * dT;
+            delta += 0.01 * dT;
         }
     }
 
@@ -91,10 +97,10 @@ void *simulate_plant() {
     fluxOut = (max / 100) * (level / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
     level = level + 0.00002 * dT * (fluxIn - fluxOut);
 
-    buffer_put(&nivel_cb, level);
-    buffer_put(&tempo_cb, simulationTime);
-    buffer_put(&angleIn_cb, anguloIn);
-    buffer_put(&angleOut_cb, get_angle_out(simulationTime));
+    buffer_put(&nivel_scb, level);
+    buffer_put(&tempo_scb, simulationTime);
+    buffer_put(&angleIn_scb, anguloIn);
+    buffer_put(&angleOut_scb, get_angle_out(simulationTime));
 
     sleepMs(10);
 

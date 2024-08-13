@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "buffer_code.h"
-#include "graph.h"
+#include "graph_server.h"
 #include "serverUDP.h"
 #include "planta.h"
 
@@ -12,13 +12,13 @@
 int main(){
     pthread_t graph_server, udp_server, plant_server;
 
-    buffer_init(&nivel_cb);
-    buffer_init(&tempo_cb);
-    buffer_init(&angleIn_cb);
-    buffer_init(&angleOut_cb);
-    buffer_init(&Start_cb);
-    buffer_init_string(&command_cb);
-    buffer_init_MessageData(&messageData_cb);
+    buffer_init(&nivel_scb);
+    buffer_init(&tempo_scb);
+    buffer_init(&angleIn_scb);
+    buffer_init(&angleOut_scb);
+    buffer_init(&Start_scb);
+    buffer_init_string(&command_scb);
+    buffer_init_MessageData(&messageData_scb);
 
     pthread_create(&plant_server, NULL, simulate_plant, NULL);
     pthread_create(&graph_server, NULL, plot_graph, NULL);
