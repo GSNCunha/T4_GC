@@ -50,7 +50,54 @@ void *start_udp_client(void *args) {
             break;
         }*/
         //trocar oq tem acima p ficar escutando o controlador
-        if(buffer_get(&delta_ccb) || buffer_get_string(&command_ccb,command)){
+        //if(buffer_get(&delta_ccb) || buffer_get_string(&command_ccb,command))
+        double buffer_delta; 
+        char buffer_message_cmd[255];
+        if(buffer_delta = buffer_get(&delta_ccb))
+        {
+            char mensagem_tratada[255] = ""; // Inicializa a string para armazenar a mensagem
+            char seq_str[4]; // Para armazenar a sequência como string
+            char buffer_delta_str[10]; // Para armazenar buffer_delta como string
+            int seq = rand() % 900 + 100; // Gera um número aleatório de 3 dígitos
+
+            // Converte o seq e buffer_delta para strings
+            sprintf(seq_str, "%d", seq);
+            sprintf(buffer_delta_str, "%d", abs(buffer_delta));
+
+            if (buffer_delta > 0) {
+                // Constrói a mensagem para buffer_delta maior que zero
+                strcat(mensagem_tratada, "OpenValve#");
+            } else if (buffer_delta < 0) {
+                // Constrói a mensagem para buffer_delta menor que zero
+                strcat(mensagem_tratada, "CloseValve#");
+            }
+
+            // Adiciona a sequência e o valor à mensagem
+            strcat(mensagem_tratada, seq_str);
+            strcat(mensagem_tratada, "#");
+            strcat(mensagem_tratada, buffer_delta_str);
+            strcat(mensagem_tratada, "!");
+
+            // Envia a mensagem
+
+            echolen = strlen(mensagem_tratada);
+            if (sendto(sock, mensagem_tratada, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
+                Die("Mismatch in number of sent bytes");
+            }
+            
+            // Receive the response from the server
+            clientlen = sizeof(echoclient);
+            if ((received = recvfrom(sock, mensagem_tratada, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen)) < 0) {
+                Die("Failed to receive bytes from server");
+            }
+            
+            mensagem_tratada[received] = '\0';  // Null-terminate the received data
+            printf("Received: %s\n", mensagem_tratada);
+        }else if (buffer_get_string(&command_ccb, buffer_message_cmd))
+        {
+
+
+
 
             echolen = strlen(buffer);
             if (sendto(sock, buffer, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
@@ -65,7 +112,15 @@ void *start_udp_client(void *args) {
             
             buffer[received] = '\0';  // Null-terminate the received data
             printf("Received: %s\n", buffer);
+            
+        }
 
+
+
+
+
+
+            //PEGA AS RESPOSTAS E MANDA P ONDE PRECISA:
             // Check if the message is in the form "Level#<value>!"
             if (strncmp(buffer, "Level#", 6) == 0) {
                 // Find the position of the '!' character
@@ -85,15 +140,12 @@ void *start_udp_client(void *args) {
                 buffer_put(&Start_ccb, 1);
 
             }
-            buffer_put(&nivel_ccb, buffer_get(&nivel_ccb));
-
             /*double lvl = 0;
             double t = 0;
             double start_flag = 0;
             buffer_put(&nivel_ccb,lvl);
             buffer_put(&tempo_ccb, t);
             buffer_put(&Start_ccb, start_flag);*/
-        }
 
         sleepMs(10); //sleep 10ms
     }

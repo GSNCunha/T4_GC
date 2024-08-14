@@ -23,8 +23,8 @@ int main(int argc, char *argv[]){
     buffer_init(&angleIn_ccb); //controle - > graph_client
     buffer_init(&Start_ccb); //clientUDP - > graph_client
     buffer_init(&delta_ccb); //clientUDP - > graph_client
-    buffer_init_string(&command_ccb); //controle - > clientUDP
-    //buffer_init_string(&comman)
+    //buffer_init_string(&command_ccb); //controle - > clientUDP
+    buffer_init_MessageData(&command_ccb);
 
     pthread_create(&graph_client, NULL, plot_graph, NULL);
     pthread_create(&controller_client, NULL, start_controller, NULL);
