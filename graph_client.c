@@ -202,7 +202,7 @@ void reset_simulation(Tdataholder *data) {
 void *plot_graph() {
   Tdataholder *data;
   double t=0;
-  double lvl;
+  double lvl = 40;
   double angleIn;
   double tempo = 0;
 
@@ -210,12 +210,12 @@ void *plot_graph() {
 
     while (1) {
       tempo += 50;
-        while (nivel_ccb.count > 0 || tempo_ccb.count > 0 || angleIn_ccb.count > 0) {
+            //buffer_put_string(&command_ccb,'GetNivel!');
             t = tempo/1000;
-            lvl = 100*buffer_get(&nivel_ccb);
+              //lvl = 100*buffer_get_last(&nivel_ccb, lvl);
             angleIn = 50;
-            datadraw(data, t, (double)lvl, (double)angleIn);
-        }
+            //datadraw(data, t, (double)lvl, (double)angleIn);
+        
         if(buffer_get(&Start_ccb) == 1)
         {
           tempo = 0;

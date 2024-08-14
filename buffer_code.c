@@ -144,6 +144,23 @@ double buffer_get(circular_buffer *cb) {
     return item;
 }
 
+double buffer_get_last(circular_buffer *cb, double last) {
+    pthread_mutex_lock(&cb->lock);
+    if (cb->count == 0) {
+        // Buffer está vazio, retornar o valor passado como parâmetro
+        pthread_mutex_unlock(&cb->lock);
+        return last;
+    }
+    
+    double item = cb->buffer[cb->head];
+    cb->head = (cb->head + 1) % BUFFER_SIZE;
+    cb->count--;
+    pthread_cond_signal(&cb->not_full);
+    pthread_mutex_unlock(&cb->lock);
+    
+    return item;
+}
+
 
 void buffer_init_MessageData(circular_buffer_MessageData *cb) {
     cb->head = 0;

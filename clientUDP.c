@@ -51,9 +51,10 @@ void *start_udp_client(void *args) {
         }*/
         //trocar oq tem acima p ficar escutando o controlador
         //if(buffer_get(&delta_ccb) || buffer_get_string(&command_ccb,command))
-        double buffer_delta; 
-        if(buffer_delta = buffer_get(&delta_ccb))
+        double buffer_delta = buffer_get(&delta_ccb); 
+        if(buffer_delta != 0)
         {
+            buffer_put(&delta_ccb, 0);
             char seq_str[4]; // Para armazenar a sequência como string
             char buffer_delta_str[10]; // Para armazenar buffer_delta como string
             int seq = rand() % 900 + 100; // Gera um número aleatório de 3 dígitos
@@ -131,8 +132,6 @@ void *start_udp_client(void *args) {
                     double level_value = strtod(value, NULL);
 
                     buffer_put(&nivel_ccb, level_value);
-                    printf("Extracted value as string: %s\n", value);
-                    printf("Extracted value as double: %f\n", level_value);
                 }
             }else if (strcmp(buffer, "Start!") == 0) {
                 buffer_put(&Start_ccb, 1);

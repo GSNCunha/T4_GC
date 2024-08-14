@@ -83,6 +83,7 @@ int buffer_get_string(circular_buffer_string *cb, char *item);
 void buffer_init(circular_buffer *cb);
 void buffer_put(circular_buffer *cb, double item);
 double buffer_get(circular_buffer *cb);
+double buffer_get_last(circular_buffer *cb, double last);
 
 void buffer_init_MessageData(circular_buffer_MessageData *cb);
 void buffer_put_MessageData(circular_buffer_MessageData *cb, MessageData item);
