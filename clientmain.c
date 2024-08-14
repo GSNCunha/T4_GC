@@ -8,6 +8,8 @@
 #include "clientUDP.h"
 #include "controller.h"
 
+#define BUFFSIZE 255
+
 
 int main(int argc, char *argv[]){
     pthread_t graph_client, udp_client, controller_client; 
@@ -23,17 +25,18 @@ int main(int argc, char *argv[]){
     buffer_init(&angleIn_ccb); //controle - > graph_client
     buffer_init(&Start_ccb); //clientUDP - > graph_client
     buffer_init(&delta_ccb); //clientUDP - > graph_client
-    //buffer_init_string(&command_ccb); //controle - > clientUDP
-    buffer_init_MessageData(&command_ccb);
+    buffer_init_string(&command_ccb); //controle - > clientUDP
+    //buffer_init_MessageData(&command_ccb);
 
     pthread_create(&graph_client, NULL, plot_graph, NULL);
     pthread_create(&controller_client, NULL, start_controller, NULL);
     pthread_create(&udp_client, NULL, start_udp_client, (void *)&argv[1]);
 
+
     while(1){
         // Prompt the user to enter a message
         printf("Enter message (or type 'exit' to quit): ");
-        char *buffer[100];
+        char buffer[BUFFSIZE];
         fgets(buffer, BUFFSIZE, stdin);
         buffer[strcspn(buffer, "\n")] = 0;  // Remove the newline character
 

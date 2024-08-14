@@ -52,10 +52,8 @@ void *start_udp_client(void *args) {
         //trocar oq tem acima p ficar escutando o controlador
         //if(buffer_get(&delta_ccb) || buffer_get_string(&command_ccb,command))
         double buffer_delta; 
-        char buffer_message_cmd[255];
         if(buffer_delta = buffer_get(&delta_ccb))
         {
-            char mensagem_tratada[255] = ""; // Inicializa a string para armazenar a mensagem
             char seq_str[4]; // Para armazenar a sequência como string
             char buffer_delta_str[10]; // Para armazenar buffer_delta como string
             int seq = rand() % 900 + 100; // Gera um número aleatório de 3 dígitos
@@ -66,34 +64,34 @@ void *start_udp_client(void *args) {
 
             if (buffer_delta > 0) {
                 // Constrói a mensagem para buffer_delta maior que zero
-                strcat(mensagem_tratada, "OpenValve#");
+                strcpy(buffer, "OpenValve#");
             } else if (buffer_delta < 0) {
                 // Constrói a mensagem para buffer_delta menor que zero
-                strcat(mensagem_tratada, "CloseValve#");
+                strcpy(buffer, "CloseValve#");
             }
 
             // Adiciona a sequência e o valor à mensagem
-            strcat(mensagem_tratada, seq_str);
-            strcat(mensagem_tratada, "#");
-            strcat(mensagem_tratada, buffer_delta_str);
-            strcat(mensagem_tratada, "!");
+            strcat(buffer, seq_str);
+            strcat(buffer, "#");
+            strcat(buffer, buffer_delta_str);
+            strcat(buffer, "!");
 
             // Envia a mensagem
 
-            echolen = strlen(mensagem_tratada);
-            if (sendto(sock, mensagem_tratada, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
+            echolen = strlen(buffer);
+            if (sendto(sock, buffer, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
                 Die("Mismatch in number of sent bytes");
             }
             
             // Receive the response from the server
             clientlen = sizeof(echoclient);
-            if ((received = recvfrom(sock, mensagem_tratada, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen)) < 0) {
+            if ((received = recvfrom(sock, buffer, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen)) < 0) {
                 Die("Failed to receive bytes from server");
             }
             
-            mensagem_tratada[received] = '\0';  // Null-terminate the received data
-            printf("Received: %s\n", mensagem_tratada);
-        }else if (buffer_get_string(&command_ccb, buffer_message_cmd))
+            buffer[received] = '\0';  // Null-terminate the received data
+            printf("Received: %s\n", buffer);
+        }else if (buffer_get_string(&command_ccb, buffer))
         {
 
 
