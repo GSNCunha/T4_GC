@@ -138,7 +138,7 @@ void *start_server() {
     struct sockaddr_in echoserver;
     struct sockaddr_in echoclient;
     char buffer[BUFFSIZE];
-    char response[BUFFSIZE];
+    char response[BUFFSIZE] = {0};
     unsigned int clientlen, serverlen;
     int received = 0;
 

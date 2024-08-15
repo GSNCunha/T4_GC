@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
 
     while(1){
         // Prompt the user to enter a message
-        printf("Enter message (or type 'exit' to quit): ");
+        //printf("Enter message (or type 'exit' to quit): ");
         char buffer[BUFFSIZE];
         fgets(buffer, BUFFSIZE, stdin);
         buffer[strcspn(buffer, "\n")] = 0;  // Remove the newline character

@@ -78,8 +78,8 @@ void *start_controller()
             sprintf(seq_str, "%d", seq);
             memset(buffer_delta_str, 0, sizeof(buffer_delta_str)); // Reset buffer
             sprintf(buffer_delta_str, "%.2f", fabs(delta));
-            printf("angulo de entrada: %.2f", Ang_saida);
-            printf("\n");
+           // printf("angulo de entrada: %.2f", Ang_saida);
+           // printf("\n");
 
             if(delta != 0)
             {
@@ -103,8 +103,8 @@ void *start_controller()
             Ang_saida_anterior = Ang_saida;
             erro_anterior = erro;
         }
-            sleepMs(450);
+            sleepMs(100);
             buffer_put_string(&command_ccb, "GetLevel!");
-            sleepMs(50);
+            sleepMs(1000);
     }
 }
