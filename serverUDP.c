@@ -13,6 +13,10 @@
 #define KEYWORD_SIZE 50
 #define RESPONSE_SIZE 10  // Assuming this size for the response string
 
+int last_seq = 0;
+double  last_value = 0;
+char last_keyword[11] = {0};
+
 void Die(char *mess) { perror(mess); exit(1); }
 
 int parse_message(const char *message, MessageData *data) {
@@ -48,6 +52,7 @@ int parse_message(const char *message, MessageData *data) {
             if (token != NULL) {
                 data->seq = atoi(token);
                 data->has_seq = true;
+
             } else {
                 return -1;  // Error: Expected sequence number
             }
@@ -63,6 +68,12 @@ int parse_message(const char *message, MessageData *data) {
         } else {
             return -1;  // Error: Malformed message
         }
+        if(data->seq == last_seq && last_seq !=0 && data->value == last_value && !strcmp(last_keyword, data->keyword))
+            return 2;
+
+        strcpy(last_keyword, data->keyword);
+        last_seq = data->seq;
+        last_value = data->value; 
 
     } else if (strcmp(data->keyword, "GetLevel") == 0 || strcmp(data->keyword, "CommTest") == 0 || strcmp(data->keyword, "Start") == 0) {
         if (next_char == '!') {
@@ -160,6 +171,7 @@ void *start_server() {
     }
     
     /* Run until cancelled */
+
     while (1) {
         /* Receive a message from the client */
         clientlen = sizeof(echoclient);
@@ -171,8 +183,8 @@ void *start_server() {
         buffer[received] = '\0';
 
         MessageData data;
-
-        if (parse_message(buffer, &data) == 0) {
+        int var_aux = parse_message(buffer, &data);
+        if (var_aux == 0) {
             double angulo;
             while (angleIn_scb.count > 0)
             {
@@ -187,7 +199,11 @@ void *start_server() {
 
             // Construct the response based on the command
             construct_response(&data, response);
-        } else {
+        } else if(var_aux == 2){
+           printf("Repeated message");
+           construct_response(&data, response);
+        }else
+        {
             printf("Failed to parse message: %s\n", buffer);
             strcpy(response, "Err!");
         }

@@ -33,7 +33,7 @@ typedef struct {
 typedef struct {
     char keyword[KEYWORD_SIZE];
     int seq;
-    int value;
+    double value;
     bool has_seq;
     bool has_value;
     char response[RESPONSE_SIZE]; // Added to handle "OK" responses
