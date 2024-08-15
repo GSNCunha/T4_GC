@@ -12,7 +12,7 @@
 #define PLANT_PERIOD 10
 
 double delta;
-double max = 50;
+double max = 100;
 double level = 0.4;
 double anguloIn = 50;
 double anguloOut;

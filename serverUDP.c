@@ -133,7 +133,8 @@ void construct_response(const MessageData *data, char *response) {
         sprintf(response, "Comm#OK!");
     } else if (strcmp(data->keyword, "SetMax") == 0) {
         if (data->has_value) {
-            sprintf(response, "Max#%d!", data->value);
+                int max = (int)data->value;
+            sprintf(response, "Max#%d!", max);
         } else {
             sprintf(response, "Err!");
         }

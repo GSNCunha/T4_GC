@@ -182,11 +182,13 @@ void reset_simulation(Tdataholder *data) {
 
     // Redraw the grid lines
     c_hlinedraw(data->canvas, 1, 0, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 255, 255, 255));
-    for (int y = 10; y < data->canvas->Ymax; y += 10) {
+    int y;
+    for (y = 10; y < data->canvas->Ymax; y += 10) {
         c_hlinedraw(data->canvas, 3, y * data->canvas->Height / data->canvas->Ymax, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 220, 220, 220));
     }
     c_vlinedraw(data->canvas, 0, 1, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 255, 255, 255));
-    for (int x = 10; x < data->canvas->Xmax; x += 10) {
+    int x ;
+    for (x = 10; x < data->canvas->Xmax; x += 10) {
         c_vlinedraw(data->canvas, x * data->canvas->Width / data->canvas->Xmax, 3, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 220, 220, 220));
     }
 
