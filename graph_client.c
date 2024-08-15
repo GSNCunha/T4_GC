@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <math.h>
+#include "buffer_code.h"
+#include "timer_utils.h"
 
 #define SCREEN_W 640 //tamanho da janela que sera criada
 #define SCREEN_H 640
@@ -42,12 +44,12 @@ typedef struct dataholder {
 
 } Tdataholder;
 
-inline void c_pixeldraw(Tcanvas *canvas, int x, int y, PixelType color)
+void c_pixeldraw(Tcanvas *canvas, int x, int y, PixelType color)
 {
   *( ((PixelType*)canvas->canvas->pixels) + ((-y+canvas->Yoffset) * canvas->canvas->w + x+ canvas->Xoffset)) = color;
 }
 
-inline void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
+void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
 {
   int offset =  (-y+canvas->Yoffset) * canvas->canvas->w;
   int x;
@@ -57,7 +59,7 @@ inline void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
   }
 }
 
-inline void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
+void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
 {
   int offset = x+canvas->Xoffset;
   int y;
@@ -69,7 +71,7 @@ inline void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
 }
 
 
-inline void c_linedraw(Tcanvas *canvas, double x0, double y0, double x1, double y1, PixelType color) {
+void c_linedraw(Tcanvas *canvas, double x0, double y0, double x1, double y1, PixelType color) {
   double x;
 
   for (x=x0; x<=x1; x+=canvas->Xstep) {
@@ -117,7 +119,6 @@ Tcanvas *c_open(int Width, int Height, double Xmax, double Ymax)
 }
 
 
-
 Tdataholder *datainit(int Width, int Height, double Xmax, double Ymax, double Lcurrent, double INcurrent, double OUTcurrent) {
   Tdataholder *data = malloc(sizeof(Tdataholder));
 
@@ -141,17 +142,12 @@ void setdatacolors(Tdataholder *data, PixelType Lcolor, PixelType INcolor, Pixel
   data->OUTcolor=OUTcolor;
 }
 
-
-
-
-void datadraw(Tdataholder *data, double time, double level, double inangle, double outangle) {
+void datadraw(Tdataholder *data, double time, double level, double inangle) {
   c_linedraw(data->canvas,data->Tcurrent,data->Lcurrent,time,level,data->Lcolor);
   c_linedraw(data->canvas,data->Tcurrent,data->INcurrent,time,inangle,data->INcolor);
-  c_linedraw(data->canvas,data->Tcurrent,data->OUTcurrent,time,outangle,data->OUTcolor);
   data->Tcurrent = time;
   data->Lcurrent = level;
   data->INcurrent = inangle;
-  data->OUTcurrent = outangle;
 
   SDL_Flip(data->canvas->canvas);
 }
@@ -170,6 +166,33 @@ void quitevent() {
 
 }
 
+void reset_simulation(Tdataholder *data) {
+    // Reset the simulation parameters
+    data->Tcurrent = 0;
+    data->Lcurrent = 100; // Set an appropriate initial value
+    data->INcurrent = 50;
+    data->OUTcurrent = 50;
+
+    // Clear the screen
+    SDL_FillRect(data->canvas->canvas, NULL, SDL_MapRGB(data->canvas->canvas->format, 0, 0, 0));
+
+    // Redraw the grid lines
+    c_hlinedraw(data->canvas, 1, 0, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 255, 255, 255));
+    int y;
+    for (y = 10; y < data->canvas->Ymax; y += 10) {
+        c_hlinedraw(data->canvas, 3, y * data->canvas->Height / data->canvas->Ymax, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 220, 220, 220));
+    }
+    c_vlinedraw(data->canvas, 0, 1, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 255, 255, 255));
+    int x;
+    for (x = 10; x < data->canvas->Xmax; x += 10) {
+        c_vlinedraw(data->canvas, x * data->canvas->Width / data->canvas->Xmax, 3, (PixelType) SDL_MapRGB(data->canvas->canvas->format, 220, 220, 220));
+    }
+
+    // Update the screen
+    SDL_Flip(data->canvas->canvas);
+}
+
+
 //
 //
 //
@@ -178,15 +201,37 @@ void quitevent() {
 //
 //
 
-int main( int argc, const char* argv[] ) {
+void *plot_graph() {
   Tdataholder *data;
   double t=0;
+  double lvl = 40;
+  double angleIn =50+100*0.5;
+  double tempo = 0;
+  double var_aux;
 
-  data = datainit(640,480,55,110,45,0,0);
+  data = datainit(640,480,120,110,45,0,0);
 
-  for (t=0;t<50;t+=0.1) {
-    datadraw(data,t,(double)(50+20*cos(t/5)),(double)(70+10*sin(t/10)),(double)(20+5*cos(t/2.5)));
-  }
+    while (1) {
+      tempo += 50;
+            //buffer_put_string(&command_ccb,'GetNivel!');
+            t = tempo/1000;
+            var_aux = 100*buffer_get(&nivel_ccb_graph);
+            if(var_aux != 0)
+              lvl = var_aux;
+              var_aux = buffer_get(&angleIn_ccb);
+            if(var_aux != 0)
+              angleIn = 50 + 0.5*var_aux;
+            datadraw(data, t, (double)lvl, (double)angleIn);
+        
+        if(buffer_get(&Start_ccb_graph) == 1)
+        {
+          tempo = 0;
+          buffer_put(&Start_ccb_graph, 0);
+          reset_simulation(data);
+        }
+        sleepMs(50);
+    }
+
 
   while(1) {
     quitevent();
