@@ -71,6 +71,7 @@ extern circular_buffer tempo_ccb;
 extern circular_buffer angleIn_ccb;
 extern circular_buffer angleOut_ccb;
 extern circular_buffer Start_ccb;
+extern circular_buffer Start_ccb_graph;
 extern circular_buffer delta_ccb;
 extern circular_buffer_string command_ccb;
 

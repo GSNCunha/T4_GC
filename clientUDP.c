@@ -135,7 +135,7 @@ void *start_udp_client(void *args) {
                 }
             }else if (strcmp(buffer, "Start#OK!") == 0) {
                 buffer_put(&Start_ccb, 1);
-
+                buffer_put(&Start_ccb_graph, 1);
             }
             /*double lvl = 0;
             double t = 0;

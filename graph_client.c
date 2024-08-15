@@ -212,16 +212,16 @@ void *plot_graph() {
       tempo += 50;
             //buffer_put_string(&command_ccb,'GetNivel!');
             t = tempo/1000;
-              //lvl = 100*buffer_get_last(&nivel_ccb, lvl);
+            lvl = 100;//*buffer_get_last(&nivel_ccb, lvl);
             angleIn = 50;
-            //datadraw(data, t, (double)lvl, (double)angleIn);
+            datadraw(data, t, (double)lvl, (double)angleIn);
         
-        /*if(buffer_get(&Start_ccb) == 1)
+        if(buffer_get(&Start_ccb_graph) == 1)
         {
           tempo = 0;
-          buffer_put(&Start_ccb, 0);
+          buffer_put(&Start_ccb_graph, 0);
           reset_simulation(data);
-        }*/
+        }
         sleepMs(50);
     }
 
