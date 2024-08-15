@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 255
 #define STRING_SIZE 50
 #define KEYWORD_SIZE 50
 #define RESPONSE_SIZE 10
