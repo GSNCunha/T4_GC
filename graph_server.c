@@ -217,7 +217,7 @@ void *plot_graph() {
         while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
             t = buffer_get(&tempo_scb) / 1000;
             lvl = 100*buffer_get(&nivel_scb);
-            angleIn = buffer_get(&angleIn_scb);
+            angleIn = 50 + 0.4*buffer_get(&angleIn_scb);
             angleOut = buffer_get(&angleOut_scb);
             datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
         }

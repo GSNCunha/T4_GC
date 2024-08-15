@@ -12,7 +12,7 @@
 #define PLANT_PERIOD 10
 
 double delta;
-double max = 100;
+double max = 50;
 double level = 0.4;
 double anguloIn = 50;
 double anguloOut;
@@ -105,7 +105,7 @@ void *simulate_plant() {
             delta += 0.01 * dT;
         }
     }
-
+    //printf("anguloIn: %.2f", anguloIn);
     fluxIn = 1 * sin(M_PI / 2 * anguloIn / 100);
     fluxOut = (max / 100) * (level / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
     level = level + (0.00002 * dT * (fluxIn - fluxOut));

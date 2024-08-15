@@ -104,12 +104,14 @@ int parse_message(const char *message, MessageData *data) {
 void construct_response(const MessageData *data, char *response) {
     if (strcmp(data->keyword, "OpenValve") == 0) {
         if (data->has_seq) {
+            printf("angulo: %.2f", buffer_get(&nivel_scb));
             sprintf(response, "Open#%d!", data->seq);
         } else {
             sprintf(response, "Err!");
         }
     } else if (strcmp(data->keyword, "CloseValve") == 0) {
         if (data->has_seq) {
+            printf("angulo: %.2f", buffer_get(&angleIn_scb));
             sprintf(response, "Close#%d!", data->seq);
         } else {
             sprintf(response, "Err!");

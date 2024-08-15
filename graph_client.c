@@ -216,12 +216,12 @@ void *plot_graph() {
             angleIn = 50;
             //datadraw(data, t, (double)lvl, (double)angleIn);
         
-        if(buffer_get(&Start_ccb) == 1)
+        /*if(buffer_get(&Start_ccb) == 1)
         {
           tempo = 0;
           buffer_put(&Start_ccb, 0);
           reset_simulation(data);
-        }
+        }*/
         sleepMs(50);
     }
 
