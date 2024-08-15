@@ -65,7 +65,7 @@ extern circular_buffer Start_scb;
 extern circular_buffer_string command_scb;
 extern circular_buffer_MessageData messageData_scb;
 
-extern circular_buffer nivel_controller;
+extern circular_buffer nivel_ccb_graph;
 extern circular_buffer nivel_ccb;
 extern circular_buffer tempo_ccb;
 extern circular_buffer angleIn_ccb;

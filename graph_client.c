@@ -203,8 +203,9 @@ void *plot_graph() {
   Tdataholder *data;
   double t=0;
   double lvl = 40;
-  double angleIn;
+  double angleIn =50+100*0.5;
   double tempo = 0;
+  double var_aux;
 
   data = datainit(640,480,120,110,45,0,0);
 
@@ -212,8 +213,12 @@ void *plot_graph() {
       tempo += 50;
             //buffer_put_string(&command_ccb,'GetNivel!');
             t = tempo/1000;
-            lvl = 100;//*buffer_get_last(&nivel_ccb, lvl);
-            angleIn = 50;
+            var_aux = 100*buffer_get(&nivel_ccb_graph);
+            if(var_aux != 0)
+              lvl = var_aux;
+              var_aux = buffer_get(&angleIn_ccb);
+            if(var_aux != 0)
+              angleIn = 50 + 0.5*var_aux;
             datadraw(data, t, (double)lvl, (double)angleIn);
         
         if(buffer_get(&Start_ccb_graph) == 1)

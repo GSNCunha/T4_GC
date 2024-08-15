@@ -59,6 +59,7 @@ circular_buffer_string message_scb;
 circular_buffer_MessageData messageData_scb; // Buffer for MessageData
 
 circular_buffer nivel_ccb;
+circular_buffer nivel_ccb_graph;
 circular_buffer tempo_ccb;
 circular_buffer angleIn_ccb;
 circular_buffer angleOut_ccb;
@@ -68,7 +69,6 @@ circular_buffer_string command_ccb;
 circular_buffer_string message_ccb;
 circular_buffer delta_ccb;
 circular_buffer_MessageData messageData_ccb; // Buffer for MessageData
-circular_buffer nivel_controller;
 
 void buffer_init_string(circular_buffer_string *cb) {
     cb->head = 0;
@@ -153,14 +153,15 @@ double buffer_get_last(circular_buffer *cb, double last) {
         return last;
     }
     
-    double item = cb->buffer[cb->head];
-    cb->head = (cb->head + 1) % BUFFER_SIZE;
-    cb->count--;
-    pthread_cond_signal(&cb->not_full);
+    // Recupera o último item inserido
+    int last_index = (cb->tail - 1 + BUFFER_SIZE) % BUFFER_SIZE;
+    double item = cb->buffer[last_index];
+    
     pthread_mutex_unlock(&cb->lock);
     
     return item;
 }
+
 
 
 void buffer_init_MessageData(circular_buffer_MessageData *cb) {

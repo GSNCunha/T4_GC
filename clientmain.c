@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
-    buffer_init(&nivel_controller);
+    buffer_init(&nivel_ccb_graph);
     buffer_init(&nivel_ccb); //clientUDP - > graph_client
     buffer_init(&tempo_ccb); //clientUDP - > graph_client
     buffer_init(&angleIn_ccb); //controle - > graph_client
