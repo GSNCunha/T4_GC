@@ -25,7 +25,7 @@ long simulationTime = 0;
 clock_t startSimulationTime;
 
 int get_angle_out(long T) { // T em ms
-    if(T <= 100000) return 50;
+    if(T <= 0) return 50;
     if(T <= 20000) return (50 + T / 400);
     if(T <= 30000) return 100;
     if(T <= 50000) return (100 - (T - 30000) / 250);
