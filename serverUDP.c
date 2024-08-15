@@ -104,14 +104,12 @@ int parse_message(const char *message, MessageData *data) {
 void construct_response(const MessageData *data, char *response) {
     if (strcmp(data->keyword, "OpenValve") == 0) {
         if (data->has_seq) {
-            printf("angulo: %.2f", buffer_get(&nivel_scb));
             sprintf(response, "Open#%d!", data->seq);
         } else {
             sprintf(response, "Err!");
         }
     } else if (strcmp(data->keyword, "CloseValve") == 0) {
         if (data->has_seq) {
-            printf("angulo: %.2f", buffer_get(&angleIn_scb));
             sprintf(response, "Close#%d!", data->seq);
         } else {
             sprintf(response, "Err!");
@@ -119,7 +117,7 @@ void construct_response(const MessageData *data, char *response) {
     } else if (strcmp(data->keyword, "GetLevel") == 0) {
     double nivel_atual = buffer_get(&nivel_scb);
 
-    sprintf(response, "Level#%f!", nivel_atual);
+    sprintf(response, "Level#%.2f!", nivel_atual);
     } else if (strcmp(data->keyword, "CommTest") == 0) {
         sprintf(response, "Comm#OK!");
     } else if (strcmp(data->keyword, "SetMax") == 0) {
@@ -175,9 +173,15 @@ void *start_server() {
         MessageData data;
 
         if (parse_message(buffer, &data) == 0) {
-            printf("Keyword: %s\n", data.keyword);
-            printf("Seq: %d\n", data.seq);
-            printf("Value: %d\n", data.value);
+            double angulo;
+            while (angleIn_scb.count > 0)
+            {
+                angulo = buffer_get(&angleIn_scb);
+            }
+            
+            //printf("Keyword: %s\n", data.keyword);
+            //printf("Seq: %d\n", data.seq);
+            //printf("Value: %d\n", data.value);
 
             buffer_put_MessageData(&messageData_scb, data);
 
@@ -188,7 +192,7 @@ void *start_server() {
             strcpy(response, "Err!");
         }
 
-        fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
+      //  fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
         
         /* Send the response back to the client */
         if (sendto(sock, response, strlen(response), 0,
