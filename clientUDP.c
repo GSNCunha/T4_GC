@@ -53,12 +53,13 @@ void *start_udp_client(void *args) {
                 if (sendto(sock, buffer_send, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
                     Die("Mismatch in number of sent bytes");
                 }
-                
+                printf("%s \n", buffer_send);
                 // Receive the response from the server
                 clientlen = sizeof(echoclient);
                 if ((received = recvfrom(sock, buffer_receive, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen)) < 0) {
                     Die("Failed to receive bytes from server");
                 }
+                printf("%s \n", buffer_receive);
                 if (strncmp(buffer_send, "OpenValve#", 10) == 0) 
                 {
                     if(strncmp(buffer_receive, "Open#", 5) == 0)
