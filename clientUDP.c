@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <sys/time.h> // Adicionar essa linha para manipular timeval
 
 #include "timer_utils.h"
 #include "buffer_code.h"
@@ -27,13 +28,23 @@ void *start_udp_client(void *args) {
     unsigned int echolen, clientlen;
     int received = 0;
     MessageData Ver_mensagem;
-    
+
+    // Configuração do timeout
+    struct timeval tv;
+    tv.tv_sec = 2;  // 2 segundos de timeout
+    tv.tv_usec = 0;
+
     // Extract IP and port from arguments
     char **argv = (char **)args;
     
     // Create the UDP socket
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
         Die("Failed to create socket");
+    }
+
+    // Set socket timeout option
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        Die("Failed to set socket receive timeout");
     }
     
     // Construct the server sockaddr_in structure
@@ -44,7 +55,7 @@ void *start_udp_client(void *args) {
     char command[50];
     while (1) {
 
-        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
+        while (nivel_ccb_graph.count > 0 || nivel_ccb.count > 0 || tempo_ccb.count > 0 || angleIn_ccb.count > 0 || Start_ccb.count > 0 || Start_ccb_graph.count > 0 || delta_ccb.count > 0) {
             double t = buffer_get(&nivel_ccb_graph) / 1000;
             double lvl = 100*buffer_get(&nivel_ccb);
             double var_aux = 50+ 0.5*buffer_get(&tempo_ccb);
@@ -68,9 +79,12 @@ void *start_udp_client(void *args) {
                 printf("%s \n", buffer_send);
                 // Receive the response from the server
                 clientlen = sizeof(echoclient);
-                if ((received = recvfrom(sock, buffer_receive, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen)) < 0) {
-                    Die("Failed to receive bytes from server");
+                received = recvfrom(sock, buffer_receive, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen);
+                if (received < 0) {
+                    perror("Failed to receive bytes from server or timeout occurred");
+                    break; // Saia do loop em caso de timeout ou erro
                 }
+                buffer_receive[received] = '\0';  // Null-terminate the received data
                 printf("%s \n", buffer_receive);
                 if (strncmp(buffer_send, "OpenValve#", 10) == 0) 
                 {
@@ -148,7 +162,6 @@ void *start_udp_client(void *args) {
                         break;
                     }
                 }
-                buffer_receive[received] = '\0';  // Null-terminate the received data
                 printf("Error receiving buffer: %s\n", buffer_send);
                 printf("\n");
                 sleepMs(10);
