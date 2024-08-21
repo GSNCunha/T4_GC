@@ -112,8 +112,8 @@ void *simulate_plant() {
     if(level >=1)
         level = 1;
     buffer_put(&nivel_scb, level);
-    printf("nivel: %.2f", level);
-    printf("\n");
+    //printf("nivel: %.2f", level);
+    //printf("\n");
     buffer_put(&tempo_scb, simulationTime);
     buffer_put(&angleIn_scb, anguloIn);
     buffer_put(&angleOut_scb, get_angle_out(simulationTime));
