@@ -19,7 +19,7 @@ void Die(char *mess) {
 }
 
 void *start_udp_client(void *args) {
-    
+
     int sock;
     struct sockaddr_in echoserver;
     struct sockaddr_in echoclient;
@@ -56,18 +56,6 @@ void *start_udp_client(void *args) {
     char command[50];
     while (1) {
 
-        /*while (nivel_ccb_graph.count > 0 || nivel_ccb.count > 0 || tempo_ccb.count > 0 || angleIn_ccb.count > 0 || Start_ccb.count > 0 || Start_ccb_graph.count > 0 || delta_ccb.count > 0) {
-            double t = buffer_get(&nivel_ccb_graph) / 1000;
-            double lvl = 100*buffer_get(&nivel_ccb);
-            double var_aux = 50+ 0.5*buffer_get(&tempo_ccb);
-            double angleOut = buffer_get(&angleIn_ccb);
-            double angleOutf = buffer_get(&Start_ccb);
-            double angleOutd = buffer_get(&Start_ccb_graph);
-            double angleOuts = buffer_get(&delta_ccb);
-            //datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
-        }*/
-
-        double buffer_delta = buffer_get(&delta_ccb); 
         if (buffer_get_string(&command_ccb, buffer_send))
         {
             int count = 0;

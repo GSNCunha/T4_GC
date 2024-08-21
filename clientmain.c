@@ -29,7 +29,7 @@ int main(int argc, char *argv[]){
     buffer_init_string(&command_ccb); //controle - > clientUDP
     //buffer_init_MessageData(&command_ccb);
 
-    //pthread_create(&graph_client, NULL, plot_graph, NULL);
+    pthread_create(&graph_client, NULL, plot_graph, NULL);
     pthread_create(&controller_client, NULL, start_controller, NULL);
     pthread_create(&udp_client, NULL, start_udp_client, (void *)&argv[1]);
 
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
         buffer_put_string(&command_ccb,buffer);
     }
 
-    //pthread_join(graph_client, NULL);
+    pthread_join(graph_client, NULL);
     pthread_join(udp_client, NULL);
     pthread_join(controller_client, NULL);
 

@@ -24,7 +24,7 @@ void *start_controller()
     while(1)
     {
         double nivel = buffer_get(&nivel_ccb);
-        //buffer_put(&nivel_ccb_graph, nivel);
+        buffer_put(&nivel_ccb_graph, nivel);
         if(nivel != 0)
         {
             double erro = NIVEL_RP - nivel;
@@ -99,7 +99,7 @@ void *start_controller()
 
                 buffer_put_string(&command_ccb, buffer);
             }
-            //buffer_put(&angleIn_ccb, round(Ang_saida));
+            buffer_put(&angleIn_ccb, round(Ang_saida));
             Ang_saida_anterior = Ang_saida;
             erro_anterior = erro;
         }
