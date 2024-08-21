@@ -61,10 +61,10 @@ void *start_controller()
 
             double Ang_saida = asin(Sinal_controle) * (200 / M_PI);
             Ang_saida = round(Ang_saida * 100.0) / 100.0;
-            if(fabs(sin(M_PI / 2 * Ang_saida  / 100) - sin(M_PI / 2 * Ang_saida_anterior / 100)) > 0.2)
+            /*if(fabs(sin(M_PI / 2 * Ang_saida  / 100) - sin(M_PI / 2 * Ang_saida_anterior / 100)) > 0.2)
             {
                 Ang_saida = Ang_saida_anterior;
-            }
+            }*/
             double delta;
 
                 delta = Ang_saida - Ang_saida_anterior;
