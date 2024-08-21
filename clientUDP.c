@@ -31,7 +31,7 @@ void *start_udp_client(void *args) {
 
     // Configuração do timeout
     struct timeval tv;
-    tv.tv_sec = 2;  // 2 segundos de timeout
+    tv.tv_sec = 1;  // 1 segundo de timeout
     tv.tv_usec = 0;
 
     // Extract IP and port from arguments
@@ -55,7 +55,7 @@ void *start_udp_client(void *args) {
     char command[50];
     while (1) {
 
-        while (nivel_ccb_graph.count > 0 || nivel_ccb.count > 0 || tempo_ccb.count > 0 || angleIn_ccb.count > 0 || Start_ccb.count > 0 || Start_ccb_graph.count > 0 || delta_ccb.count > 0) {
+        /*while (nivel_ccb_graph.count > 0 || nivel_ccb.count > 0 || tempo_ccb.count > 0 || angleIn_ccb.count > 0 || Start_ccb.count > 0 || Start_ccb_graph.count > 0 || delta_ccb.count > 0) {
             double t = buffer_get(&nivel_ccb_graph) / 1000;
             double lvl = 100*buffer_get(&nivel_ccb);
             double var_aux = 50+ 0.5*buffer_get(&tempo_ccb);
@@ -64,7 +64,7 @@ void *start_udp_client(void *args) {
             double angleOutd = buffer_get(&Start_ccb_graph);
             double angleOuts = buffer_get(&delta_ccb);
             //datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
-        }
+        }*/
 
         double buffer_delta = buffer_get(&delta_ccb); 
         if (buffer_get_string(&command_ccb, buffer_send))
