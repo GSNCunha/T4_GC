@@ -224,14 +224,18 @@ void *plot_graph() {
             if(var_aux != 0)
               angleIn = var_aux;
             angleOut = buffer_get(&angleOut_scb);
-            datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
+            if(t !=0)
+            {
+              datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
+            }
+            
         }
         if(buffer_get(&Start_scb) == 1)
         {
           buffer_put(&Start_scb, 0);
           reset_simulation(data);
         }
-        sleepMs(50);
+        sleepMs(5);
     }
 
 

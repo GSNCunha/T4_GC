@@ -212,7 +212,7 @@ void *plot_graph() {
   data = datainit(640,480,120,110,45,0,0);
 
     while (1) {
-      tempo += 50;
+      tempo += 75;
             //buffer_put_string(&command_ccb,'GetNivel!');
             t = tempo/1000;
             var_aux = 100*buffer_get(&nivel_ccb_graph);
