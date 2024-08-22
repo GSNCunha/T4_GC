@@ -220,7 +220,7 @@ void *plot_graph() {
         while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
             t = buffer_get(&tempo_scb) / 1000;
             lvl = 100*buffer_get(&nivel_scb);
-            var_aux = 50+ 0.5*buffer_get(&angleIn_scb);
+            var_aux = buffer_get(&angleIn_scb);
             if(var_aux != 0)
               angleIn = var_aux;
             angleOut = buffer_get(&angleOut_scb);

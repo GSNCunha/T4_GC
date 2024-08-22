@@ -174,14 +174,7 @@ void *start_server() {
     /* Run until cancelled */
 
     while (1) {
-
-        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
-            double t = buffer_get(&tempo_scb) / 1000;
-            double lvl = 100*buffer_get(&nivel_scb);
-            double var_aux = 50+ 0.5*buffer_get(&angleIn_scb);
-            double angleOut = buffer_get(&angleOut_scb);
-            //datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
-        }
+        
         /* Receive a message from the client */
         clientlen = sizeof(echoclient);
         if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
@@ -191,7 +184,7 @@ void *start_server() {
         }
         buffer[received] = '\0';
 
-        printf("%s \n", buffer);
+        //printf("%s \n", buffer);
 
         MessageData data;
         int var_aux = parse_message(buffer, &data);
@@ -220,7 +213,8 @@ void *start_server() {
         }
 
       //  fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
-        printf("%s \n", response);
+        //printf("%s \n", response);
+        
         /* Send the response back to the client */
         if (sendto(sock, response, strlen(response), 0,
                    (struct sockaddr *) &echoclient,

@@ -32,7 +32,7 @@ void *start_udp_client(void *args) {
 
     // Configuração do timeout
     struct timeval tv;
-    tv.tv_sec = 1;  // 1 segundo de timeout
+    tv.tv_sec = 1.5;  // 1 segundo de timeout
     tv.tv_usec = 0;
 
     // Extract IP and port from arguments
@@ -65,16 +65,16 @@ void *start_udp_client(void *args) {
                 if (sendto(sock, buffer_send, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
                     Die("Mismatch in number of sent bytes");
                 }
-                printf("%s \n", buffer_send);
+                //printf("%s \n", buffer_send);
                 // Receive the response from the server
                 clientlen = sizeof(echoclient);
                 received = recvfrom(sock, buffer_receive, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen);
                 if (received < 0) {
                     perror("Failed to receive bytes from server or timeout occurred");
-                    break; // Saia do loop em caso de timeout ou erro
+                    continue; // Tente o mesmo comando novamente
                 }
                 buffer_receive[received] = '\0';  // Null-terminate the received data
-                printf("%s \n", buffer_receive);
+                //printf("%s \n", buffer_receive);
                 if (strncmp(buffer_send, "OpenValve#", 10) == 0) 
                 {
                     if(strncmp(buffer_receive, "Open#", 5) == 0)
@@ -165,7 +165,7 @@ void *start_udp_client(void *args) {
             }
         }
 
-        sleepMs(10); //sleep 10ms
+        sleepMs(10);//sleep 10ms
     }
 
     // Close the socket

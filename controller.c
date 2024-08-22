@@ -19,8 +19,12 @@ void *start_controller()
     double erro_acumulado = 0;
     char buffer[100];
 
-    while(!buffer_get(&Start_ccb));
-     buffer_put_string(&command_ccb, "OpenValve#000#30!");
+    buffer_put_string(&command_ccb, "SetMax#100!");
+    sleepMs(1000);
+    buffer_put_string(&command_ccb, "Start!");
+    sleepMs(1000);
+    buffer_put_string(&command_ccb, "OpenValve#000#30!");
+    sleepMs(1000);
     while(1)
     {
         double nivel = buffer_get(&nivel_ccb);
@@ -105,6 +109,6 @@ void *start_controller()
         }
             sleepMs(100);
             buffer_put_string(&command_ccb, "GetLevel!");
-            sleepMs(1000);
+            sleepMs(800);
     }
 }

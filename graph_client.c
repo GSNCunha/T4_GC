@@ -220,7 +220,7 @@ void *plot_graph() {
               lvl = var_aux;
               var_aux = buffer_get(&angleIn_ccb);
             if(var_aux != 0)
-              angleIn = 50 + 0.5*var_aux;
+              angleIn = var_aux;
             datadraw(data, t, (double)lvl, (double)angleIn);
         
         if(buffer_get(&Start_ccb_graph) == 1)
