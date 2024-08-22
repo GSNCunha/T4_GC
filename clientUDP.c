@@ -70,7 +70,7 @@ void *start_udp_client(void *args) {
                 clientlen = sizeof(echoclient);
                 received = recvfrom(sock, buffer_receive, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen);
                 if (received < 0) {
-                    perror("Failed to receive bytes from server or timeout occurred");
+                    perror("");
                     continue; // Tente o mesmo comando novamente
                 }
                 buffer_receive[received] = '\0';  // Null-terminate the received data

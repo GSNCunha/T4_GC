@@ -23,8 +23,9 @@ void *start_controller()
     sleepMs(1000);
     buffer_put_string(&command_ccb, "Start!");
     sleepMs(1000);
-    buffer_put_string(&command_ccb, "OpenValve#000#30!");
+    buffer_put_string(&command_ccb, "OpenValve#000#50!");
     sleepMs(1000);
+
     while(1)
     {
         double nivel = buffer_get(&nivel_ccb);

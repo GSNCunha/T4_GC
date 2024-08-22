@@ -211,7 +211,7 @@ void *start_server() {
             // Construct the response based on the command
             construct_response(&data, response);
         } else if(var_aux == 2){
-           printf("Repeated message");
+           //printf("Repeated message");
            construct_response(&data, response);
         }else
         {
