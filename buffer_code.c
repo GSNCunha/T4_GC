@@ -10,6 +10,7 @@
 #define KEYWORD_SIZE 50
 #define RESPONSE_SIZE 10
 
+// Estrutura de buffer circular para valores double
 typedef struct {
     double buffer[BUFFER_SIZE];
     int head;
@@ -20,6 +21,7 @@ typedef struct {
     pthread_cond_t not_full;
 } circular_buffer;
 
+// Estrutura de buffer circular para strings
 typedef struct {
     char buffer[BUFFER_SIZE][STRING_SIZE];
     int head;
@@ -30,15 +32,17 @@ typedef struct {
     pthread_cond_t not_full;
 } circular_buffer_string;
 
+// Estrutura de dados para armazenar mensagens com palavra-chave, sequência e valor
 typedef struct {
     char keyword[KEYWORD_SIZE];
     int seq;
     double value;
     bool has_seq;
     bool has_value;
-    char response[RESPONSE_SIZE]; // Added to handle "OK" responses
+    char response[RESPONSE_SIZE]; // Adicionado para lidar com respostas "OK"
 } MessageData;
 
+// Estrutura de buffer circular para MessageData
 typedef struct {
     MessageData buffer[BUFFER_SIZE];
     int head;
@@ -49,6 +53,7 @@ typedef struct {
     pthread_cond_t not_full;
 } circular_buffer_MessageData;
 
+// Declaração dos buffers circulares para diferentes tipos de dados
 circular_buffer nivel_scb;
 circular_buffer tempo_scb;
 circular_buffer angleIn_scb;
@@ -56,7 +61,7 @@ circular_buffer angleOut_scb;
 circular_buffer Start_scb;
 circular_buffer_string command_scb;
 circular_buffer_string message_scb;
-circular_buffer_MessageData messageData_scb; // Buffer for MessageData
+circular_buffer_MessageData messageData_scb; // Buffer para MessageData
 
 circular_buffer nivel_ccb;
 circular_buffer nivel_ccb_graph;
@@ -68,8 +73,9 @@ circular_buffer Start_ccb_graph;
 circular_buffer_string command_ccb;
 circular_buffer_string message_ccb;
 circular_buffer delta_ccb;
-circular_buffer_MessageData messageData_ccb; // Buffer for MessageData
+circular_buffer_MessageData messageData_ccb; // Buffer para MessageData
 
+// Função para inicializar um buffer circular de strings
 void buffer_init_string(circular_buffer_string *cb) {
     cb->head = 0;
     cb->tail = 0;
@@ -79,25 +85,27 @@ void buffer_init_string(circular_buffer_string *cb) {
     pthread_cond_init(&cb->not_full, NULL);
 }
 
+// Função para inserir uma string no buffer circular
 void buffer_put_string(circular_buffer_string *cb, const char *item) {
     pthread_mutex_lock(&cb->lock);
     while (cb->count == BUFFER_SIZE) {
         pthread_cond_wait(&cb->not_full, &cb->lock);
     }
     strncpy(cb->buffer[cb->tail], item, STRING_SIZE - 1);
-    cb->buffer[cb->tail][STRING_SIZE - 1] = '\0';  // Ensure null-termination
+    cb->buffer[cb->tail][STRING_SIZE - 1] = '\0';  // Garantir terminação nula
     cb->tail = (cb->tail + 1) % BUFFER_SIZE;
     cb->count++;
     pthread_cond_signal(&cb->not_empty);
     pthread_mutex_unlock(&cb->lock);
 }
 
+// Função para recuperar uma string do buffer circular
 int buffer_get_string(circular_buffer_string *cb, char *item) {
     pthread_mutex_lock(&cb->lock);
     if (cb->count == 0) {
-        // Buffer is empty, return a special value
+        // Buffer está vazio, retornar um valor especial
         pthread_mutex_unlock(&cb->lock);
-        return 0;  // Or any other special value that indicates "nothing to read"
+        return 0;  // Ou outro valor especial que indique "nada para ler"
     }
     strncpy(item, cb->buffer[cb->head], STRING_SIZE);
     cb->head = (cb->head + 1) % BUFFER_SIZE;
@@ -107,6 +115,7 @@ int buffer_get_string(circular_buffer_string *cb, char *item) {
     return 1;
 }
 
+// Função para inicializar um buffer circular de double
 void buffer_init(circular_buffer *cb) {
     cb->head = 0;
     cb->tail = 0;
@@ -116,6 +125,7 @@ void buffer_init(circular_buffer *cb) {
     pthread_cond_init(&cb->not_full, NULL);
 }
 
+// Função para inserir um valor double no buffer circular
 void buffer_put(circular_buffer *cb, double item) {
     pthread_mutex_lock(&cb->lock);
     while (cb->count == BUFFER_SIZE) {
@@ -128,12 +138,13 @@ void buffer_put(circular_buffer *cb, double item) {
     pthread_mutex_unlock(&cb->lock);
 }
 
+// Função para recuperar um valor double do buffer circular
 double buffer_get(circular_buffer *cb) {
     pthread_mutex_lock(&cb->lock);
     if (cb->count == 0) {
-        // Buffer is empty, return a special value
+        // Buffer está vazio, retornar um valor especial
         pthread_mutex_unlock(&cb->lock);
-        return 0;  // Or any other special value that indicates "nothing to read"
+        return 0;  // Ou outro valor especial que indique "nada para ler"
     }
     
     double item = cb->buffer[cb->head];
@@ -145,6 +156,7 @@ double buffer_get(circular_buffer *cb) {
     return item;
 }
 
+// Função para recuperar o último valor válido do buffer circular
 double buffer_get_last(circular_buffer *cb, double last) {
     pthread_mutex_lock(&cb->lock);
     if (cb->count == 0) {
@@ -162,8 +174,7 @@ double buffer_get_last(circular_buffer *cb, double last) {
     return item;
 }
 
-
-
+// Função para inicializar um buffer circular de MessageData
 void buffer_init_MessageData(circular_buffer_MessageData *cb) {
     cb->head = 0;
     cb->tail = 0;
@@ -173,6 +184,7 @@ void buffer_init_MessageData(circular_buffer_MessageData *cb) {
     pthread_cond_init(&cb->not_full, NULL);
 }
 
+// Função para inserir uma MessageData no buffer circular
 void buffer_put_MessageData(circular_buffer_MessageData *cb, MessageData item) {
     pthread_mutex_lock(&cb->lock);
     while (cb->count == BUFFER_SIZE) {
@@ -185,20 +197,19 @@ void buffer_put_MessageData(circular_buffer_MessageData *cb, MessageData item) {
     pthread_mutex_unlock(&cb->lock);
 }
 
+// Função para recuperar uma MessageData do buffer circular
 MessageData buffer_get_MessageData(circular_buffer_MessageData *cb) {
     pthread_mutex_lock(&cb->lock);
 
-    // Check if the buffer is empty
+    // Verifica se o buffer está vazio
     if (cb->count == 0) {
         pthread_mutex_unlock(&cb->lock);
-        // Handle the case when the buffer is empty
-        // This could be returning a special value, logging an error, etc.
-        // Here, we'll assume you return a default-constructed MessageData
-        MessageData empty_message = {0};  // or another way to create a "null" message
+        // Retornar uma MessageData "vazia" como valor especial
+        MessageData empty_message = {0};  // Ou outra forma de criar uma mensagem "nula"
         return empty_message;
     }
 
-    // Proceed with reading the message
+    // Recupera a MessageData
     MessageData item = cb->buffer[cb->head];
     cb->head = (cb->head + 1) % BUFFER_SIZE;
     cb->count--;

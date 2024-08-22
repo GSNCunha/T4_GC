@@ -11,107 +11,112 @@
 
 #define BUFFSIZE 255
 #define KEYWORD_SIZE 50
-#define RESPONSE_SIZE 10  // Assuming this size for the response string
+#define RESPONSE_SIZE 10  // Tamanho assumido para a string de resposta
 
+// Variáveis globais para armazenar o último estado
 int last_seq = 0;
-double  last_value = 0;
+double last_value = 0;
 char last_keyword[11] = {0};
 
-void Die(char *mess) { perror(mess); exit(1); }
+// Função para imprimir erro e encerrar o programa
+void Die(char *mess) { 
+    perror(mess); 
+    exit(1); 
+}
 
+// Função para analisar a mensagem recebida
 int parse_message(const char *message, MessageData *data) {
-    // Initialize variables to hold the parts of the message
     char temp_message[BUFFSIZE];
     strcpy(temp_message, message);
 
-    // Initialize fields to indicate whether we have seq and value parts
     data->seq = -1;
     data->value = -1;
     data->has_seq = false;
     data->has_value = false;
-    memset(data->response, 0, RESPONSE_SIZE); // Clear the response field
+    memset(data->response, 0, RESPONSE_SIZE);
 
     char *token = strtok(temp_message, "#!");
 
-    // Check the keyword
+    // Verifica o keyword
     if (token != NULL) {
         strncpy(data->keyword, token, KEYWORD_SIZE);
-        data->keyword[KEYWORD_SIZE - 1] = '\0';  // Ensure null-termination
+        data->keyword[KEYWORD_SIZE - 1] = '\0';
     } else {
-        return -1;  // Error: Malformed message
+        return -1;  // Erro: Mensagem malformada
     }
 
-    // Determine what follows the keyword
     char next_char = message[strlen(token)];
     
-    // Switch-case like structure based on the keyword
+    // Verifica o keyword e processa conforme o tipo de comando
     if (strcmp(data->keyword, "OpenValve") == 0 || strcmp(data->keyword, "CloseValve") == 0) {
         if (next_char == '#') {
-            // Read sequence
+            // Lê o seq
             token = strtok(NULL, "#");
             if (token != NULL) {
                 data->seq = atoi(token);
                 data->has_seq = true;
-
             } else {
-                return -1;  // Error: Expected sequence number
+                return -1;  // Erro: Esperado número de sequência
             }
 
-            // Read value
+            // Lê o valor
             token = strtok(NULL, "!");
             if (token != NULL) {
                 data->value = atoi(token);
                 data->has_value = true;
             } else {
-                return -1;  // Error: Expected value
+                return -1;  // Erro: Esperado valor
             }
         } else {
-            return -1;  // Error: Malformed message
+            return -1;  // Erro: Mensagem malformada
         }
-        if(data->seq == last_seq && last_seq !=0 && data->value == last_value && !strcmp(last_keyword, data->keyword))
-            return 2;
 
+        // Verifica se a mensagem é repetida
+        if (data->seq == last_seq && last_seq != 0 && data->value == last_value && !strcmp(last_keyword, data->keyword)) {
+            return 2;
+        }
+
+        // Atualiza o último estado
         strcpy(last_keyword, data->keyword);
         last_seq = data->seq;
         last_value = data->value; 
 
     } else if (strcmp(data->keyword, "GetLevel") == 0 || strcmp(data->keyword, "CommTest") == 0 || strcmp(data->keyword, "Start") == 0) {
         if (next_char == '!') {
-            // These commands should only have the keyword and a '!'
             if (strtok(NULL, "#!") != NULL) {
-                return -1;  // Error: Unexpected additional content after keyword
+                return -1;  // Erro: Conteúdo adicional inesperado após o keyword
             }
         } else {
-            return -1;  // Error: Malformed message
+            return -1;  // Erro: Mensagem malformada
         }
 
     } else if (strcmp(data->keyword, "SetMax") == 0) {
         if (next_char == '#') {
-            // Read value
+            // Lê o valor
             token = strtok(NULL, "!");
             if (token != NULL) {
                 data->value = atoi(token);
                 data->has_value = true;
             } else {
-                return -1;  // Error: Expected value
+                return -1;  // Erro: Esperado valor
             }
         } else {
-            return -1;  // Error: Malformed message
+            return -1;  // Erro: Mensagem malformada
         }
 
     } else {
-        return -1;  // Error: Unrecognized keyword
+        return -1;  // Erro: Keyword não reconhecido
     }
 
-    // Ensure the final token ends with '!'
+    // Verifica se a mensagem termina com '!'
     if (message[strlen(message) - 1] != '!') {
-        return -1;  // Error: Malformed message
+        return -1;  // Erro: Mensagem malformada
     }
 
-    return 0;  // Success
+    return 0;  // Sucesso
 }
 
-
+// Função para construir a resposta com base na mensagem recebida
 void construct_response(const MessageData *data, char *response) {
     if (strcmp(data->keyword, "OpenValve") == 0) {
         if (data->has_seq) {
@@ -126,14 +131,13 @@ void construct_response(const MessageData *data, char *response) {
             sprintf(response, "Err!");
         }
     } else if (strcmp(data->keyword, "GetLevel") == 0) {
-    double nivel_atual = buffer_get(&nivel_scb);
-
-    sprintf(response, "Level#%.2f!", nivel_atual);
+        double nivel_atual = buffer_get(&nivel_scb);
+        sprintf(response, "Level#%.2f!", nivel_atual);
     } else if (strcmp(data->keyword, "CommTest") == 0) {
         sprintf(response, "Comm#OK!");
     } else if (strcmp(data->keyword, "SetMax") == 0) {
         if (data->has_value) {
-                int max = (int)data->value;
+            int max = (int)data->value;
             sprintf(response, "Max#%d!", max);
         } else {
             sprintf(response, "Err!");
@@ -145,6 +149,7 @@ void construct_response(const MessageData *data, char *response) {
     }
 }
 
+// Função principal para iniciar o servidor
 void *start_server() {
     int sock;
     struct sockaddr_in echoserver;
@@ -154,73 +159,59 @@ void *start_server() {
     unsigned int clientlen, serverlen;
     int received = 0;
 
-    /* Create the UDP socket */
+    // Cria o socket UDP
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-        Die("Failed to create socket");
+        Die("Falha ao criar socket");
     }
     
-    /* Construct the server sockaddr_in structure */
-    memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
-    echoserver.sin_family = AF_INET;                  /* Internet/IP */
-    echoserver.sin_addr.s_addr = htonl(INADDR_ANY);   /* Any IP address */
-    echoserver.sin_port = htons(8080);                /* Hardcoded server port */
+    // Configura a estrutura sockaddr_in do servidor
+    memset(&echoserver, 0, sizeof(echoserver));
+    echoserver.sin_family = AF_INET;
+    echoserver.sin_addr.s_addr = htonl(INADDR_ANY);
+    echoserver.sin_port = htons(8080);
     
-    /* Bind the socket */
+    // Faz o bind do socket
     serverlen = sizeof(echoserver);
     if (bind(sock, (struct sockaddr *) &echoserver, serverlen) < 0) {
-        Die("Failed to bind server socket");
+        Die("Falha ao fazer bind no socket do servidor");
     }
     
-    /* Run until cancelled */
-
+    // Executa até ser cancelado
     while (1) {
-
-        
-        /* Receive a message from the client */
+        // Recebe uma mensagem do cliente
         clientlen = sizeof(echoclient);
         if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
                                  (struct sockaddr *) &echoclient,
                                  &clientlen)) < 0) {
-            Die("Failed to receive message");
+            Die("Falha ao receber mensagem");
         }
         buffer[received] = '\0';
-
-        //printf("%s \n", buffer);
 
         MessageData data;
         int var_aux = parse_message(buffer, &data);
         if (var_aux == 0) {
             double angulo;
-            while (angleIn_scb.count > 0)
-            {
+            while (angleIn_scb.count > 0) {
                 angulo = buffer_get(&angleIn_scb);
             }
-            
-            //printf("Keyword: %s\n", data.keyword);
-            //printf("Seq: %d\n", data.seq);
-            //printf("Value: %d\n", data.value);
 
             buffer_put_MessageData(&messageData_scb, data);
 
-            // Construct the response based on the command
+            // Constrói a resposta com base no comando
             construct_response(&data, response);
-        } else if(var_aux == 2){
-           printf("Repeated message");
-           construct_response(&data, response);
-        }else
-        {
-            printf("Failed to parse message: %s\n", buffer);
+        } else if (var_aux == 2) {
+            printf("Mensagem repetida");
+            construct_response(&data, response);
+        } else {
+            printf("Falha ao analisar mensagem: %s\n", buffer);
             strcpy(response, "Err!");
         }
-
-      //  fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
-        //printf("%s \n", response);
         
-        /* Send the response back to the client */
+        // Envia a resposta de volta ao cliente
         if (sendto(sock, response, strlen(response), 0,
                    (struct sockaddr *) &echoclient,
                    sizeof(echoclient)) != strlen(response)) {
-            Die("Mismatch in number of sent bytes");
+            Die("Número de bytes enviados não corresponde");
         }
     }
 }
