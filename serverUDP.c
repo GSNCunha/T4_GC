@@ -175,12 +175,6 @@ void *start_server() {
 
     while (1) {
 
-        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
-            double t = buffer_get(&tempo_scb) / 1000;
-            double lvl = 100*buffer_get(&nivel_scb);
-            double var_aux = buffer_get(&angleIn_scb);
-            double angleOut = buffer_get(&angleOut_scb);
-        }
         
         /* Receive a message from the client */
         clientlen = sizeof(echoclient);
