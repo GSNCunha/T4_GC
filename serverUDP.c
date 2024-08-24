@@ -148,7 +148,7 @@ void construct_response(const MessageData *data, char *response) {
     }
 }
 
-void *start_server() {
+void *start_server(void *args) {
     int sock;
     struct sockaddr_in echoserver;
     struct sockaddr_in echoclient;
@@ -159,6 +159,9 @@ void *start_server() {
     fd_set readSet;
     struct timeval timeout = {0};
 
+    // Extract port from arguments
+    char **argv = (char **)args;
+
     /* Create the UDP socket */
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
         Die("Failed to create socket");
@@ -168,7 +171,7 @@ void *start_server() {
     memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
     echoserver.sin_family = AF_INET;                  /* Internet/IP */
     echoserver.sin_addr.s_addr = htonl(INADDR_ANY);   /* Any IP address */
-    echoserver.sin_port = htons(8100);                /* Hardcoded server port */
+    echoserver.sin_port = htons(atoi(argv[0]));               /* Hardcoded server port */
     
     /* Bind the socket */
     serverlen = sizeof(echoserver);

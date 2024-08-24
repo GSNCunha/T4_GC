@@ -55,7 +55,8 @@ int main(int argc, char *argv[]){
     pthread_join(graph_client, NULL);
     pthread_join(udp_client, NULL);
     pthread_join(controller_client, NULL);
-
-
+    system("clear");
+    printf("Client closed!\n");
+    
     return 0;
 }

@@ -223,6 +223,7 @@ void *plot_graph() {
             if(var_aux != 0)
               angleIn = var_aux;
             //datadraw(data, t, (double)lvl, (double)angleIn);
+            system("clear");
             printf("tempo: %.2f\n", t);
             printf("nivel: %.2f\n", lvl);
             printf("angleIn: %.2f\n", angleIn);
