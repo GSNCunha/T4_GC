@@ -6,13 +6,14 @@
 #include "buffer_code.h"
 #include "graph_client.h"
 #include "clientUDP.h"
+#include "clientUDP_receive.h"
 #include "controller.h"
 
 #define BUFFSIZE 255
 
 
 int main(int argc, char *argv[]){
-    pthread_t graph_client, udp_client, controller_client; 
+    pthread_t graph_client, udp_client, udp_client_receive, controller_client; 
 
     if (argc != 3) {
         fprintf(stderr, "USAGE: %s <server_ip> <port>\n", argv[0]);
@@ -27,11 +28,13 @@ int main(int argc, char *argv[]){
     buffer_init(&Start_ccb_graph); //clientUDP - > graph_client
     buffer_init(&delta_ccb); //clientUDP - > graph_client
     buffer_init_string(&command_ccb); //controle - > clientUDP
+    buffer_init_MessageData_client_receive(&messageData_client_receive_ccb);
     //buffer_init_MessageData(&command_ccb);
 
     pthread_create(&graph_client, NULL, plot_graph, NULL);
     pthread_create(&controller_client, NULL, start_controller, NULL);
     pthread_create(&udp_client, NULL, start_udp_client, (void *)&argv[1]);
+    pthread_create(&udp_client_receive, NULL, start_udp_client_receive, NULL);
 
 
     while(1){
@@ -50,10 +53,12 @@ int main(int argc, char *argv[]){
 
     pthread_cancel(graph_client);
     pthread_cancel(udp_client);
+    pthread_cancel(udp_client_receive);
     pthread_cancel(controller_client);
 
     pthread_join(graph_client, NULL);
     pthread_join(udp_client, NULL);
+    pthread_join(udp_client_receive, NULL);
     pthread_join(controller_client, NULL);
 
 

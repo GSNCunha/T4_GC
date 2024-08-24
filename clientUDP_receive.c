@@ -9,22 +9,11 @@
 
 #include "timer_utils.h"
 #include "buffer_code.h"
+#include "clientUDP.h"
 
 #define BUFFSIZE 255
-#define MAX_MESSAGES 10
+#define MAX_MESSAGES 50
 #define KEYWORD_SIZE 50
-
-typedef struct {
-    char message[KEYWORD_SIZE];
-    char keyword[KEYWORD_SIZE];
-    char value[KEYWORD_SIZE];
-    int num_conferencias;
-} MessageData_client_receive;
-
-void Die(char *mess) { 
-    perror(mess); 
-    exit(1); 
-}
 
 MessageData_client_receive mensagens[MAX_MESSAGES];
 
@@ -35,11 +24,13 @@ void loop_de_conferencia(char *keyword, char *value) {
                 if(strncmp(mensagens[x].value, value, strlen(value)) == 0) {
                     // Remover a mensagem do array (limpar o slot)
                     memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
+                    printf("mensagem conferida \n");
                     break;
                 }
             } else {
                 // Caso em que value é NULL, apenas remove a mensagem com o keyword correspondente
                 memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
+                printf("mensagem conferida \n");
                 break;
             }
         }
@@ -56,7 +47,7 @@ void add_message_to_array(MessageData_client_receive *mensagem, MessageData_clie
     }
 }
 
-void *start_udp_client_receive(void *args) {
+void *start_udp_client_receive() {
 
     int sock;
     struct sockaddr_in echoserver;
@@ -65,9 +56,6 @@ void *start_udp_client_receive(void *args) {
     char command[50];
     unsigned int clientlen;
     int received = 0;
-
-    // Extract IP and port from arguments
-    char **argv = (char **)args;
     
     // Create the UDP socket
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
@@ -77,11 +65,19 @@ void *start_udp_client_receive(void *args) {
     // Construct the server sockaddr_in structure
     memset(&echoserver, 0, sizeof(echoserver));
     echoserver.sin_family = AF_INET;
-    echoserver.sin_addr.s_addr = inet_addr(argv[0]);
-    echoserver.sin_port = htons(atoi(argv[1]));
+    echoserver.sin_addr.s_addr = inet_addr("127.0.0.1");  // O endereço IP deve ser passado como uma string
+    echoserver.sin_port = htons(8080);
+
+    // Bind the socket to the server address
+    if (bind(sock, (struct sockaddr *)&echoserver, sizeof(echoserver)) < 0) {
+        perror("Failed to bind socket");
+        exit(1);
+    }
 
     while (1) {
-        MessageData_client_receive message = buffer_get_MessageData(&messageData_ccb);
+
+        MessageData_client_receive message = buffer_get_MessageData_client_receive(&messageData_client_receive_ccb);
+
         if(message.keyword[0] != '\0') {
             add_message_to_array(&message, mensagens);
         }
@@ -92,7 +88,11 @@ void *start_udp_client_receive(void *args) {
             perror("Failed to receive bytes from server");
             continue; // Tente o mesmo comando novamente
         }
-
+        
+        printf("%s", buffer_receive);
+        printf("aqui");
+        fflush(stdout);
+        
         if (strncmp(buffer_receive, "Open#", 5) == 0) {
             char numero_extraido[10];
             sscanf(buffer_receive, "Open#%[^!]!", numero_extraido);
@@ -120,9 +120,10 @@ void *start_udp_client_receive(void *args) {
 
         // Remover mensagens que falharam em 5 conferências
         for(int x = 0; x < MAX_MESSAGES; x++) {
-            if(mensagens[x].num_conferencias >= 5) {
+            if(mensagens[x].num_conferencias >= 8) {
                 buffer_put_string(&command_ccb, mensagens[x].message);
                 memset(&mensagens[x], 0, sizeof(MessageData_client_receive));  // Limpa o slot
+                printf("tentar mandar msg novamente \n");
             }
         }
     }

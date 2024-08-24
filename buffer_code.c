@@ -40,6 +40,13 @@ typedef struct {
 } MessageData;
 
 typedef struct {
+    char message[KEYWORD_SIZE];
+    char keyword[KEYWORD_SIZE];
+    char value[KEYWORD_SIZE];
+    int num_conferencias;
+} MessageData_client_receive;
+
+typedef struct {
     MessageData buffer[BUFFER_SIZE];
     int head;
     int tail;
@@ -48,6 +55,16 @@ typedef struct {
     pthread_cond_t not_empty;
     pthread_cond_t not_full;
 } circular_buffer_MessageData;
+
+typedef struct {
+    MessageData_client_receive buffer[BUFFER_SIZE];
+    int head;
+    int tail;
+    int count;
+    pthread_mutex_t lock;
+    pthread_cond_t not_empty;
+    pthread_cond_t not_full;
+} circular_buffer_MessageData_client_receive;
 
 circular_buffer nivel_scb;
 circular_buffer tempo_scb;
@@ -69,6 +86,8 @@ circular_buffer_string command_ccb;
 circular_buffer_string message_ccb;
 circular_buffer delta_ccb;
 circular_buffer_MessageData messageData_ccb; // Buffer for MessageData
+circular_buffer_MessageData_client_receive messageData_client_receive_ccb; // Buffer for MessageData_client_receive
+
 
 void buffer_init_string(circular_buffer_string *cb) {
     cb->head = 0;
@@ -162,8 +181,6 @@ double buffer_get_last(circular_buffer *cb, double last) {
     return item;
 }
 
-
-
 void buffer_init_MessageData(circular_buffer_MessageData *cb) {
     cb->head = 0;
     cb->tail = 0;
@@ -200,6 +217,48 @@ MessageData buffer_get_MessageData(circular_buffer_MessageData *cb) {
 
     // Proceed with reading the message
     MessageData item = cb->buffer[cb->head];
+    cb->head = (cb->head + 1) % BUFFER_SIZE;
+    cb->count--;
+    pthread_cond_signal(&cb->not_full);
+    pthread_mutex_unlock(&cb->lock);
+
+    return item;
+}
+
+void buffer_init_MessageData_client_receive(circular_buffer_MessageData_client_receive *cb) {
+    cb->head = 0;
+    cb->tail = 0;
+    cb->count = 0;
+    pthread_mutex_init(&cb->lock, NULL);
+    pthread_cond_init(&cb->not_empty, NULL);
+    pthread_cond_init(&cb->not_full, NULL);
+}
+
+void buffer_put_MessageData_client_receive(circular_buffer_MessageData_client_receive *cb, MessageData_client_receive item) {
+    pthread_mutex_lock(&cb->lock);
+    while (cb->count == BUFFER_SIZE) {
+        pthread_cond_wait(&cb->not_full, &cb->lock);
+    }
+    cb->buffer[cb->tail] = item;
+    cb->tail = (cb->tail + 1) % BUFFER_SIZE;
+    cb->count++;
+    pthread_cond_signal(&cb->not_empty);
+    pthread_mutex_unlock(&cb->lock);
+}
+
+MessageData_client_receive buffer_get_MessageData_client_receive(circular_buffer_MessageData_client_receive *cb) {
+    pthread_mutex_lock(&cb->lock);
+
+    // Check if the buffer is empty
+    if (cb->count == 0) {
+        pthread_mutex_unlock(&cb->lock);
+        // Handle the case when the buffer is empty
+        MessageData_client_receive empty_message = {0};  // or another way to create a "null" message
+        return empty_message;
+    }
+
+    // Proceed with reading the message
+    MessageData_client_receive item = cb->buffer[cb->head];
     cb->head = (cb->head + 1) % BUFFER_SIZE;
     cb->count--;
     pthread_cond_signal(&cb->not_full);

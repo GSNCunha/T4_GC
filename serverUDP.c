@@ -3,9 +3,12 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <netinet/in.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <unistd.h>
+#include <stdio.h>
 
 #include "buffer_code.h"
 
@@ -153,6 +156,8 @@ void *start_server() {
     char response[BUFFSIZE] = {0};
     unsigned int clientlen, serverlen;
     int received = 0;
+    fd_set readSet;
+    struct timeval timeout = {0};
 
     /* Create the UDP socket */
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
@@ -181,40 +186,43 @@ void *start_server() {
             double var_aux = buffer_get(&angleIn_scb);
             double angleOut = buffer_get(&angleOut_scb);
         }*/
-        
-        /* Receive a message from the client */
-        clientlen = sizeof(echoclient);
-        if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
-                                 (struct sockaddr *) &echoclient,
-                                 &clientlen)) < 0) {
-            Die("Failed to receive message");
-        }
-        buffer[received] = '\0';
+        FD_SET(sock, &readSet);
+        select(sock+1, &readSet, NULL, NULL, &timeout);
+        if (FD_ISSET(sock, &readSet)) {
+            /* Receive a message from the client */
+            clientlen = sizeof(echoclient);
+            if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
+                                    (struct sockaddr *) &echoclient,
+                                    &clientlen)) < 0) {
+                Die("Failed to receive message");
+            }
+            buffer[received] = '\0';
+            printf("%s \n", buffer);
+            //printf("%s \n", buffer);
 
-        //printf("%s \n", buffer);
-
-        MessageData data;
-        int var_aux = parse_message(buffer, &data);
-        if (var_aux == 0) {
-            buffer_put_MessageData(&messageData_scb, data);
-            // Construct the response based on the command
+            MessageData data;
+            int var_aux = parse_message(buffer, &data);
+            if (var_aux == 0) {
+                buffer_put_MessageData(&messageData_scb, data);
+                // Construct the response based on the command
+                construct_response(&data, response);
+            } else if(var_aux == 2){
+            printf("Repeated message");
             construct_response(&data, response);
-        } else if(var_aux == 2){
-           printf("Repeated message");
-           construct_response(&data, response);
-        }else
-        {
-            printf("Failed to parse message: %s\n", buffer);
-            strcpy(response, "Err!");
-        }
-      //  fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
-        //printf("%s \n", response);
-        
-        /* Send the response back to the client */
-        if (sendto(sock, response, strlen(response), 0,
-                   (struct sockaddr *) &echoclient,
-                   sizeof(echoclient)) != strlen(response)) {
-            Die("Mismatch in number of sent bytes");
+            }else
+            {
+                printf("Failed to parse message: %s\n", buffer);
+                strcpy(response, "Err!");
+            }
+        //  fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
+            //printf("%s \n", response);
+            
+            /* Send the response back to the client */
+            if (sendto(sock, response, strlen(response), 0,
+                    (struct sockaddr *) &echoclient,
+                    sizeof(echoclient)) != strlen(response)) {
+                Die("Mismatch in number of sent bytes");
+            }
         }
     }
 }
