@@ -217,7 +217,7 @@ void *plot_graph() {
   data = datainit(640,480,120,110,45,0,0);
 
     while (1) {
-        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
+        while (nivel_scb.count > 0 && tempo_scb.count > 0 && angleIn_scb.count > 0 && angleOut_scb.count > 0) {
             t = buffer_get(&tempo_scb) / 1000;
             lvl = 100*buffer_get(&nivel_scb);
             var_aux = buffer_get(&angleIn_scb);
@@ -235,7 +235,7 @@ void *plot_graph() {
           buffer_put(&Start_scb, 0);
           reset_simulation(data);
         }
-        sleepMs(5);
+        sleepMs(50);
     }
 
 

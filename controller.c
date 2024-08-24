@@ -107,8 +107,7 @@ void *start_controller()
             Ang_saida_anterior = Ang_saida;
             erro_anterior = erro;
         }
-            sleepMs(100);
-            //buffer_put_string(&command_ccb, "GetLevel!");
-            sleepMs(800);
+            buffer_put_string(&command_ccb, "GetLevel!");
+            sleepMs(500);
     }
 }

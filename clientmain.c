@@ -46,8 +46,6 @@ int main(int argc, char *argv[]){
             break;
             //fechar o bgl todo
         }
-
-        buffer_put_string(&command_ccb,buffer);
     }
 
     pthread_cancel(graph_client);

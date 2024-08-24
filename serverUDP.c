@@ -175,12 +175,12 @@ void *start_server() {
 
     while (1) {
 
-        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
+        /*if (nivel_scb.count > 0 && tempo_scb.count > 0 && angleIn_scb.count > 0 && angleOut_scb.count > 0) {
             double t = buffer_get(&tempo_scb) / 1000;
             double lvl = 100*buffer_get(&nivel_scb);
             double var_aux = buffer_get(&angleIn_scb);
             double angleOut = buffer_get(&angleOut_scb);
-        }
+        }*/
         
         /* Receive a message from the client */
         clientlen = sizeof(echoclient);
@@ -196,18 +196,7 @@ void *start_server() {
         MessageData data;
         int var_aux = parse_message(buffer, &data);
         if (var_aux == 0) {
-            double angulo;
-            while (angleIn_scb.count > 0)
-            {
-                angulo = buffer_get(&angleIn_scb);
-            }
-            
-            //printf("Keyword: %s\n", data.keyword);
-            //printf("Seq: %d\n", data.seq);
-            //printf("Value: %d\n", data.value);
-
             buffer_put_MessageData(&messageData_scb, data);
-
             // Construct the response based on the command
             construct_response(&data, response);
         } else if(var_aux == 2){
@@ -218,7 +207,6 @@ void *start_server() {
             printf("Failed to parse message: %s\n", buffer);
             strcpy(response, "Err!");
         }
-
       //  fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
         //printf("%s \n", response);
         
