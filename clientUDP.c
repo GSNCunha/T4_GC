@@ -6,6 +6,10 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <unistd.h>
+#include <stdio.h>
 
 #include "timer_utils.h"
 #include "buffer_code.h"
@@ -28,6 +32,8 @@ void *start_udp_client(void *args) {
     unsigned int echolen, clientlen;
     int received = 0;
     MessageData Ver_mensagem;
+    fd_set readSet;
+    struct timeval timeout = {0};
 
     // Extract IP and port from arguments
     char **argv = (char **)args;
@@ -44,7 +50,8 @@ void *start_udp_client(void *args) {
     echoserver.sin_port = htons(atoi(argv[1]));
     char command[50];
     while (1) {
-
+        memset(buffer_send, 0, sizeof(buffer_send));
+        memset(buffer_receive, 0, sizeof(buffer_receive));
         if (buffer_get_string(&command_ccb, buffer_send))
         {
             int count = 0;
@@ -56,6 +63,9 @@ void *start_udp_client(void *args) {
                 }
                 //printf("%s \n", buffer_send);
                 // Receive the response from the server
+                //FD_SET(sock, &readSet);
+                //select(sock+1, &readSet, NULL, NULL, &timeout); //timeout de 0s, ou tem coisa ou nao tem
+                //if (FD_ISSET(sock, &readSet)) {
                 clientlen = sizeof(echoclient);
                 received = recvfrom(sock, buffer_receive, BUFFSIZE, 0, (struct sockaddr *)&echoclient, &clientlen);
                 if (received < 0) {
@@ -63,6 +73,9 @@ void *start_udp_client(void *args) {
                     continue; // Tente o mesmo comando novamente
                 }
                 buffer_receive[received] = '\0';  // Null-terminate the received data
+                //}else{
+                 //   buffer_receive[0] = '\0';
+                //}
                 //printf("%s \n", buffer_receive);
                 if (strncmp(buffer_send, "OpenValve#", 10) == 0) 
                 {
@@ -140,7 +153,7 @@ void *start_udp_client(void *args) {
                         break;
                     }
                 }
-                printf("Error receiving buffer: %s\n", buffer_send);
+                printf("Error receiving buffer:%s\n", buffer_send);
                 printf("\n");
                 sleepMs(10);
                 count ++;
@@ -153,10 +166,8 @@ void *start_udp_client(void *args) {
                 }
             }
         }
-
         sleepMs(10);//sleep 10ms
     }
-
     // Close the socket
     close(sock);
     return NULL;

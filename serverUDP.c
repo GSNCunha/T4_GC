@@ -183,17 +183,34 @@ void *start_server(void *args) {
 
     while (1) {
 
-        /*if (nivel_scb.count > 0 && tempo_scb.count > 0 && angleIn_scb.count > 0 && angleOut_scb.count > 0) {
+        /*while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
             double t = buffer_get(&tempo_scb) / 1000;
             double lvl = 100*buffer_get(&nivel_scb);
             double var_aux = buffer_get(&angleIn_scb);
             double angleOut = buffer_get(&angleOut_scb);
         }*/
+
+        //flush buffers:
+        if(nivel_scb.count == 0){
+          flush_cb(&nivel_scb);
+        }
+        if(tempo_scb.count == 0){
+          flush_cb(&tempo_scb);
+        }
+        if(angleIn_scb.count == 0){
+          flush_cb(&angleIn_scb);
+        }
+        if(angleOut_scb.count == 0){
+          flush_cb(&angleOut_scb);
+        }
+
         FD_SET(sock, &readSet);
         select(sock+1, &readSet, NULL, NULL, &timeout); //timeout de 0s, ou tem coisa ou nao tem
         if (FD_ISSET(sock, &readSet)) {
             /* Receive a message from the client */
             clientlen = sizeof(echoclient);
+            memset(buffer, 0, sizeof(buffer));
+            buffer[0] = '\0';
             if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
                                     (struct sockaddr *) &echoclient,
                                     &clientlen)) < 0) {
@@ -210,7 +227,7 @@ void *start_server(void *args) {
                 // Construct the response based on the command
                 construct_response(&data, response);
             } else if(var_aux == 2){
-            printf("Repeated message");
+            printf("Repeated message"); //o problema ta aqui
             construct_response(&data, response);
             }else
             {

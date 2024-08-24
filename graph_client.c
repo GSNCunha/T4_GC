@@ -202,14 +202,14 @@ void reset_simulation(Tdataholder *data) {
 //
 
 void *plot_graph() {
-  //Tdataholder *data;
+  Tdataholder *data;
   double t=0;
   double lvl = 40;
   double angleIn =50+100*0.5;
   double tempo = 0;
   double var_aux;
 
-  //data = datainit(640,480,120,110,45,0,0);
+  data = datainit(640,480,120,110,45,0,0);
 
     while (1) {
       tempo += 50;
@@ -222,18 +222,19 @@ void *plot_graph() {
               var_aux = buffer_get(&angleIn_ccb);
             if(var_aux != 0)
               angleIn = var_aux;
-            //datadraw(data, t, (double)lvl, (double)angleIn);
+            datadraw(data, t, (double)lvl, (double)angleIn);
+            /*fflush(stdout);
             system("clear");
             printf("tempo: %.2f\n", t);
             printf("nivel: %.2f\n", lvl);
-            printf("angleIn: %.2f\n", angleIn);
+            printf("angleIn: %.2f\n", angleIn);*/
 
         
         if(buffer_get(&Start_ccb_graph) == 1)
         {
           tempo = 0;
           buffer_put(&Start_ccb_graph, 0);
-          //reset_simulation(data);
+          reset_simulation(data);
         }
         sleepMs(50);
     }

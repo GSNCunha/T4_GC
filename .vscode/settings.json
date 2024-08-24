@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "buffer_code.h": "c"
+        "buffer_code.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c"
     }
 }

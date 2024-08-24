@@ -207,3 +207,16 @@ MessageData buffer_get_MessageData(circular_buffer_MessageData *cb) {
 
     return item;
 }
+
+void flush_cb(circular_buffer *cb) {
+    cb->head = 0;
+    cb->tail = 0;
+}
+void flush_cb_string(circular_buffer_string *cb) {
+    cb->head = 0;
+    cb->tail = 0;
+}
+void flush_cb_messageData(circular_buffer_MessageData *cb) {
+    cb->head = 0;
+    cb->tail = 0;
+}

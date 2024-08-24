@@ -89,5 +89,9 @@ double buffer_get_last(circular_buffer *cb, double last);
 void buffer_init_MessageData(circular_buffer_MessageData *cb);
 void buffer_put_MessageData(circular_buffer_MessageData *cb, MessageData item);
 MessageData buffer_get_MessageData(circular_buffer_MessageData *cb);
+void flush_cb(circular_buffer *cb);
+void flush_cb_string(circular_buffer_string *cb);
+void flush_cb_messageData(circular_buffer_MessageData *cb);
+
 
 #endif // BUFFER_H
