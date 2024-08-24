@@ -23,7 +23,7 @@ void *start_controller()
     sleepMs(1000);
     buffer_put_string(&command_ccb, "Start!");
     sleepMs(1000);
-    buffer_put_string(&command_ccb, "OpenValve#000#30!");
+    buffer_put_string(&command_ccb, "OpenValve#001#50!");
     sleepMs(1000);
     while(1)
     {
@@ -71,7 +71,7 @@ void *start_controller()
             }*/
             double delta;
 
-                delta = Ang_saida - Ang_saida_anterior;
+                delta =(int) (Ang_saida - Ang_saida_anterior);
                 
 
             char seq_str[4]; // To store the sequence as a string
@@ -81,7 +81,7 @@ void *start_controller()
             // Convert seq and buffer_delta to strings
             sprintf(seq_str, "%d", seq);
             memset(buffer_delta_str, 0, sizeof(buffer_delta_str)); // Reset buffer
-            sprintf(buffer_delta_str, "%.2f", fabs(delta));
+            sprintf(buffer_delta_str, "%d", (int)fabs(delta));
            // printf("angulo de entrada: %.2f", Ang_saida);
            // printf("\n");
 
@@ -108,7 +108,7 @@ void *start_controller()
             erro_anterior = erro;
         }
             sleepMs(100);
-            buffer_put_string(&command_ccb, "GetLevel!");
+            //buffer_put_string(&command_ccb, "GetLevel!");
             sleepMs(800);
     }
 }

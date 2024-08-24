@@ -116,7 +116,7 @@ void *start_udp_client(void *args) {
                             // Convert the extracted value to a double
                             double level_value = strtod(value, NULL);
 
-                            buffer_put(&nivel_ccb, level_value);
+                            buffer_put(&nivel_ccb, level_value/100);
                         }
                         break;
                     }

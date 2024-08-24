@@ -50,9 +50,14 @@ int main(int argc, char *argv[]){
         buffer_put_string(&command_ccb,buffer);
     }
 
+    pthread_cancel(graph_client);
+    pthread_cancel(udp_client);
+    pthread_cancel(controller_client);
+
     pthread_join(graph_client, NULL);
     pthread_join(udp_client, NULL);
     pthread_join(controller_client, NULL);
+
 
     return 0;
 }

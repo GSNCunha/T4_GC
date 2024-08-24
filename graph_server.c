@@ -235,7 +235,7 @@ void *plot_graph() {
           buffer_put(&Start_scb, 0);
           reset_simulation(data);
         }
-        sleepMs(50);
+        sleepMs(5);
     }
 
 

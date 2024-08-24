@@ -126,9 +126,9 @@ void construct_response(const MessageData *data, char *response) {
             sprintf(response, "Err!");
         }
     } else if (strcmp(data->keyword, "GetLevel") == 0) {
-    double nivel_atual = buffer_get(&nivel_scb);
+    double nivel_atual = 100*buffer_get(&nivel_scb);
 
-    sprintf(response, "Level#%.2f!", nivel_atual);
+    sprintf(response, "Level#%d!", (int)nivel_atual);
     } else if (strcmp(data->keyword, "CommTest") == 0) {
         sprintf(response, "Comm#OK!");
     } else if (strcmp(data->keyword, "SetMax") == 0) {
@@ -163,7 +163,7 @@ void *start_server() {
     memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
     echoserver.sin_family = AF_INET;                  /* Internet/IP */
     echoserver.sin_addr.s_addr = htonl(INADDR_ANY);   /* Any IP address */
-    echoserver.sin_port = htons(8080);                /* Hardcoded server port */
+    echoserver.sin_port = htons(8100);                /* Hardcoded server port */
     
     /* Bind the socket */
     serverlen = sizeof(echoserver);
@@ -175,6 +175,12 @@ void *start_server() {
 
     while (1) {
 
+        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
+            double t = buffer_get(&tempo_scb) / 1000;
+            double lvl = 100*buffer_get(&nivel_scb);
+            double var_aux = buffer_get(&angleIn_scb);
+            double angleOut = buffer_get(&angleOut_scb);
+        }
         
         /* Receive a message from the client */
         clientlen = sizeof(echoclient);
