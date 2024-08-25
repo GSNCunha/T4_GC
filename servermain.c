@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "buffer_code.h"
-#include "graph_server.h"
+//#include "graph_server.h"
 #include "serverUDP.h"
 #include "planta.h"
 
@@ -22,11 +22,11 @@ int main(){
     buffer_init_MessageData(&messageData_scb);
 
     pthread_create(&plant_server, NULL, simulate_plant, NULL);
-    pthread_create(&graph_server, NULL, plot_graph, NULL);
+    //pthread_create(&graph_server, NULL, plot_graph, NULL);
     pthread_create(&udp_server, NULL, start_server, NULL);
 
     pthread_join(plant_server, NULL);
-    pthread_join(graph_server, NULL);
+    //pthread_join(graph_server, NULL);
     pthread_join(udp_server, NULL);
 
     return 0;

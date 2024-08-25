@@ -23,10 +23,11 @@ void Die(char *mess) {
 MessageData_client_receive mensagens[MAX_MESSAGES];
 
 void loop_de_conferencia(char *keyword, char *value) {
-    for(int x = 0; x < MAX_MESSAGES; x++) {
-        if(strncmp(mensagens[x].keyword, keyword, strlen(keyword)) == 0) {
-            if(value != NULL) {
-                if(atoi(mensagens[x].value) == atoi(value)) {
+    int x;
+    for (x = 0; x < MAX_MESSAGES; x++) {
+        if (strncmp(mensagens[x].keyword, keyword, strlen(keyword)) == 0) {
+            if (value != NULL) {
+                if (atoi(mensagens[x].value) == atoi(value)) {
                     memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
                     printf("mensagem conferida %s \n", keyword);
                     break;
@@ -42,7 +43,8 @@ void loop_de_conferencia(char *keyword, char *value) {
 }
 
 void add_message_to_array(MessageData_client_receive *mensagem, MessageData_client_receive array[MAX_MESSAGES]) {
-    for (int i = 0; i < MAX_MESSAGES; i++) {
+    int i;
+    for (i = 0; i < MAX_MESSAGES; i++) {
         if (array[i].keyword[0] == '\0') {  // Verifica se a posição está vazia
             array[i] = *mensagem;
             break;
@@ -73,6 +75,7 @@ void *start_udp_client(void *args) {
     echoserver.sin_family = AF_INET;
     echoserver.sin_addr.s_addr = inet_addr(argv[0]);
     echoserver.sin_port = htons(atoi(argv[1]));
+
     char command[50];
     while (1) {
 
@@ -192,8 +195,9 @@ void *start_udp_client(void *args) {
             }
 
             // Remover mensagens que falharam em 20 conferências
-            for(int x = 0; x < MAX_MESSAGES; x++) {
-                if(mensagens[x].num_conferencias >= 5) {
+            int x;
+            for (x = 0; x < MAX_MESSAGES; x++) {
+                if (mensagens[x].num_conferencias >= 5) {
                     buffer_put_string(&command_ccb, mensagens[x].message);
                     memset(&mensagens[x], 0, sizeof(MessageData_client_receive));  // Limpa o slot
                     printf("tentar mandar msg novamente \n");

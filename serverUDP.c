@@ -124,9 +124,9 @@ void construct_response(const MessageData *data, char *response) {
         }
     } else if (strcmp(data->keyword, "GetLevel") == 0) {
         int nivel_atual = 0;
-         while (nivel_scb.count > 0) {
-                    nivel_atual = 100*buffer_get(&nivel_scb);
-                }
+        while (nivel_scb.count > 0) {
+            nivel_atual = 100 * buffer_get(&nivel_scb);
+        }
         sprintf(response, "Level#%d!", nivel_atual);
     } else if (strcmp(data->keyword, "CommTest") == 0) {
         sprintf(response, "Comm#OK!");
@@ -154,7 +154,8 @@ void add_message_to_history(const char *message) {
 }
 
 bool is_message_in_history(const char *message) {
-    for (int i = 0; i < MESSAGE_HISTORY_SIZE; i++) {
+    int i;
+    for (i = 0; i < MESSAGE_HISTORY_SIZE; i++) {
         if (strncmp(message_history[i], message, BUFFSIZE) == 0) {
             return true;
         }
