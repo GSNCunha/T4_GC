@@ -213,7 +213,6 @@ void *plot_graph() {
 
     while (1) {
       tempo += 50;
-            //buffer_put_string(&command_ccb,'GetNivel!');
             t = tempo/1000;
             var_aux = buffer_get(&nivel_ccb_graph);
             if(var_aux != 0)
@@ -222,6 +221,14 @@ void *plot_graph() {
             if(var_aux != 0)
               angleIn = var_aux;
             datadraw(data, t, (double)lvl, (double)angleIn);
+            //Código pra testar no bitwise sem a parte gráfica:
+            /*fflush(stdout);
+            system("clear");
+            printf("tempo: %.2f\n", t);
+            printf("nivel: %.2f\n", lvl);
+            printf("angleIn: %.2f\n", angleIn);*/
+            //-------------------------------------------
+
         
         if(buffer_get(&Start_ccb_graph) == 1)
         {

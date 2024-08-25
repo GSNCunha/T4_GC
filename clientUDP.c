@@ -29,12 +29,12 @@ void loop_de_conferencia(char *keyword, char *value) {
             if (value != NULL) {
                 if (atoi(mensagens[x].value) == atoi(value)) {
                     memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
-                    printf("mensagem conferida %s \n", keyword);
+                    //printf("mensagem conferida %s \n", keyword);
                     break;
                 }
             } else {
                 memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
-                printf("mensagem conferida %s \n", keyword);
+                //printf("mensagem conferida %s \n", keyword);
                 break;
             }
         }
@@ -160,7 +160,7 @@ void *start_udp_client(void *args) {
             }
         }
         if (received > 0) {
-            printf("%s \n", buffer_receive);
+            //printf("%s \n", buffer_receive);
 
             // Processar a mensagem recebida
             if (strncmp(buffer_receive, "Open#", 5) == 0) {
@@ -179,7 +179,7 @@ void *start_udp_client(void *args) {
                 sscanf(buffer_receive, "Level#%[^!]!", numero_extraido);
                 int nivel = strtod(numero_extraido, NULL);
                 buffer_put(&nivel_ccb, nivel);
-                printf("%s \n", buffer_receive);
+                //printf("%s \n", buffer_receive);
                 fflush(stdout);
 
             } else if (strncmp(buffer_receive, "Comm#OK!", 8) == 0) {

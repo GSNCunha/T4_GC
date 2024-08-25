@@ -163,7 +163,7 @@ bool is_message_in_history(const char *message) {
     return false;
 }
 
-void *start_server() {
+void *start_server(void *args) {
     int sock;
     struct sockaddr_in echoserver;
     struct sockaddr_in echoclient;
@@ -174,6 +174,9 @@ void *start_server() {
     fd_set readSet;
     struct timeval timeout = {0};
 
+    // Extract port from arguments
+    char **argv = (char **)args;
+
     /* Create the UDP socket */
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
         Die("Failed to create socket");
@@ -183,7 +186,7 @@ void *start_server() {
     memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
     echoserver.sin_family = AF_INET;                  /* Internet/IP */
     echoserver.sin_addr.s_addr = htonl(INADDR_ANY);   /* Any IP address */
-    echoserver.sin_port = htons(8100);                /* Hardcoded server port */
+    echoserver.sin_port = htons(atoi(argv[0]));                /* Hardcoded server port */
     
     /* Bind the socket */
     serverlen = sizeof(echoserver);
@@ -207,17 +210,17 @@ void *start_server() {
                 Die("Failed to receive message");
             }
             buffer[received] = '\0';
-            printf("%s \n", buffer);
+            //printf("%s \n", buffer);
 
             if (strncmp(buffer, "OpenValve#", 10) == 0 || strncmp(buffer, "CloseValve#", 11) == 0) {
                 if (is_message_in_history(buffer)) {
-                    printf("Repeated message\n");
+                    //printf("Repeated message\n");
                     MessageData data;
                     int var_aux = parse_message(buffer, &data);
                     if (var_aux == 0) {
                         construct_response(&data, response);
                     } else {
-                        printf("Failed to parse message: %s\n", buffer);
+                        //printf("Failed to parse message: %s\n", buffer);
                         strcpy(response, "Err!");
                     }
                     
@@ -231,7 +234,7 @@ void *start_server() {
                         // Construct the response based on the command
                         construct_response(&data, response);
                     } else {
-                        printf("Failed to parse message: %s\n", buffer);
+                        //printf("Failed to parse message: %s\n", buffer);
                         strcpy(response, "Err!");
                     }
                 }
@@ -244,7 +247,7 @@ void *start_server() {
                     // Construct the response based on the command
                     construct_response(&data, response);
                 } else {
-                    printf("Failed to parse message: %s\n", buffer);
+                    //printf("Failed to parse message: %s\n", buffer);
                     strcpy(response, "Err!");
                 }
             }
