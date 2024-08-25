@@ -193,7 +193,7 @@ void *start_udp_client(void *args) {
 
             // Remover mensagens que falharam em 20 conferências
             for(int x = 0; x < MAX_MESSAGES; x++) {
-                if(mensagens[x].num_conferencias >= 20) {
+                if(mensagens[x].num_conferencias >= 5) {
                     buffer_put_string(&command_ccb, mensagens[x].message);
                     memset(&mensagens[x], 0, sizeof(MessageData_client_receive));  // Limpa o slot
                     printf("tentar mandar msg novamente \n");

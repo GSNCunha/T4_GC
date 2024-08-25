@@ -8,17 +8,16 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <unistd.h>
-#include <stdio.h>
 
 #include "buffer_code.h"
 
 #define BUFFSIZE 255
 #define KEYWORD_SIZE 50
 #define RESPONSE_SIZE 10  // Assuming this size for the response string
+#define MESSAGE_HISTORY_SIZE 30
 
-int last_seq = 0;
-double  last_value = 0;
-char last_keyword[11] = {0};
+char message_history[MESSAGE_HISTORY_SIZE][BUFFSIZE];
+int message_history_index = 0;
 
 void Die(char *mess) { perror(mess); exit(1); }
 
@@ -71,12 +70,6 @@ int parse_message(const char *message, MessageData *data) {
         } else {
             return -1;  // Error: Malformed message
         }
-        if(data->seq == last_seq && last_seq !=0 && data->value == last_value && !strcmp(last_keyword, data->keyword))
-            return 2;
-
-        strcpy(last_keyword, data->keyword);
-        last_seq = data->seq;
-        last_value = data->value; 
 
     } else if (strcmp(data->keyword, "GetLevel") == 0 || strcmp(data->keyword, "CommTest") == 0 || strcmp(data->keyword, "Start") == 0) {
         if (next_char == '!') {
@@ -114,9 +107,8 @@ int parse_message(const char *message, MessageData *data) {
     return 0;  // Success
 }
 
-
 void construct_response(const MessageData *data, char *response) {
-     memset(response, 0, sizeof(response));
+    memset(response, 0, sizeof(response));
 
     if (strcmp(data->keyword, "OpenValve") == 0) {
         if (data->has_seq) {
@@ -131,14 +123,13 @@ void construct_response(const MessageData *data, char *response) {
             sprintf(response, "Err!");
         }
     } else if (strcmp(data->keyword, "GetLevel") == 0) {
-    int nivel_atual = 100*buffer_get(&nivel_scb);
-
-    sprintf(response, "Level#%d!", nivel_atual);
+        int nivel_atual = 100 * buffer_get(&nivel_scb);
+        sprintf(response, "Level#%d!", nivel_atual);
     } else if (strcmp(data->keyword, "CommTest") == 0) {
         sprintf(response, "Comm#OK!");
     } else if (strcmp(data->keyword, "SetMax") == 0) {
         if (data->has_value) {
-                int max = (int)data->value;
+            int max = (int)data->value;
             sprintf(response, "Max#%d!", max);
         } else {
             sprintf(response, "Err!");
@@ -148,6 +139,24 @@ void construct_response(const MessageData *data, char *response) {
     } else {
         sprintf(response, "Err!");
     }
+}
+
+void add_message_to_history(const char *message) {
+    // Add the new message to the circular buffer
+    strncpy(message_history[message_history_index], message, BUFFSIZE);
+    message_history[message_history_index][BUFFSIZE - 1] = '\0';  // Ensure null-termination
+
+    // Update the index for the circular buffer
+    message_history_index = (message_history_index + 1) % MESSAGE_HISTORY_SIZE;
+}
+
+bool is_message_in_history(const char *message) {
+    for (int i = 0; i < MESSAGE_HISTORY_SIZE; i++) {
+        if (strncmp(message_history[i], message, BUFFSIZE) == 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void *start_server() {
@@ -178,29 +187,32 @@ void *start_server() {
         Die("Failed to bind server socket");
     }
     
+    /* Initialize message history */
+    memset(message_history, 0, sizeof(message_history));
+
     /* Run until cancelled */
-
     while (1) {
-
-        /*if (nivel_scb.count > 0 && tempo_scb.count > 0 && angleIn_scb.count > 0 && angleOut_scb.count > 0) {
-            double t = buffer_get(&tempo_scb) / 1000;
-            double lvl = 100*buffer_get(&nivel_scb);
-            double var_aux = buffer_get(&angleIn_scb);
-            double angleOut = buffer_get(&angleOut_scb);
-        }*/
         FD_SET(sock, &readSet);
-        select(sock+1, &readSet, NULL, NULL, &timeout);
+        select(sock + 1, &readSet, NULL, NULL, &timeout);
         if (FD_ISSET(sock, &readSet)) {
             /* Receive a message from the client */
             clientlen = sizeof(echoclient);
             if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
-                                    (struct sockaddr *) &echoclient,
-                                    &clientlen)) < 0) {
+                                     (struct sockaddr *)&echoclient,
+                                     &clientlen)) < 0) {
                 Die("Failed to receive message");
             }
             buffer[received] = '\0';
             printf("%s \n", buffer);
-            //printf("%s \n", buffer);
+
+            if (strncmp(buffer, "OpenValve#", 10) == 0 || strncmp(buffer, "CloseValve#", 11) == 0) {
+                if (is_message_in_history(buffer)) {
+                    printf("Repeated message\n");
+                    // Handle repeated message as needed
+                } else {
+                    add_message_to_history(buffer);
+                }
+            }
 
             MessageData data;
             int var_aux = parse_message(buffer, &data);
@@ -208,21 +220,15 @@ void *start_server() {
                 buffer_put_MessageData(&messageData_scb, data);
                 // Construct the response based on the command
                 construct_response(&data, response);
-            } else if(var_aux == 2){
-            printf("Repeated message");
-            construct_response(&data, response);
-            }else
-            {
+            } else {
                 printf("Failed to parse message: %s\n", buffer);
                 strcpy(response, "Err!");
             }
-        //  fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
-            //printf("%s \n", response);
-            
+
             /* Send the response back to the client */
             if (sendto(sock, response, strlen(response), 0,
-                    (struct sockaddr *) &echoclient,
-                    sizeof(echoclient)) != strlen(response)) {
+                       (struct sockaddr *)&echoclient,
+                       sizeof(echoclient)) != strlen(response)) {
                 Die("Mismatch in number of sent bytes");
             }
         }

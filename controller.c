@@ -110,6 +110,6 @@ void *start_controller()
             erro_anterior = erro;
         }
             buffer_put_string(&command_ccb, "GetLevel!");
-            sleepMs(500);
+            sleepMs(1000);
     }
 }
