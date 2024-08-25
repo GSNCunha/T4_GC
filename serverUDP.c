@@ -212,21 +212,41 @@ void *start_server() {
             if (strncmp(buffer, "OpenValve#", 10) == 0 || strncmp(buffer, "CloseValve#", 11) == 0) {
                 if (is_message_in_history(buffer)) {
                     printf("Repeated message\n");
-                    // Handle repeated message as needed
+                    MessageData data;
+                    int var_aux = parse_message(buffer, &data);
+                    if (var_aux == 0) {
+                        construct_response(&data, response);
+                    } else {
+                        printf("Failed to parse message: %s\n", buffer);
+                        strcpy(response, "Err!");
+                    }
+                    
                 } else {
                     add_message_to_history(buffer);
-                }
-            }
 
-            MessageData data;
-            int var_aux = parse_message(buffer, &data);
-            if (var_aux == 0) {
-                buffer_put_MessageData(&messageData_scb, data);
-                // Construct the response based on the command
-                construct_response(&data, response);
-            } else {
-                printf("Failed to parse message: %s\n", buffer);
-                strcpy(response, "Err!");
+                    MessageData data;
+                    int var_aux = parse_message(buffer, &data);
+                    if (var_aux == 0) {
+                        buffer_put_MessageData(&messageData_scb, data);
+                        // Construct the response based on the command
+                        construct_response(&data, response);
+                    } else {
+                        printf("Failed to parse message: %s\n", buffer);
+                        strcpy(response, "Err!");
+                    }
+                }
+            }else
+            {       
+                MessageData data;
+                int var_aux = parse_message(buffer, &data);
+                if (var_aux == 0) {
+                    buffer_put_MessageData(&messageData_scb, data);
+                    // Construct the response based on the command
+                    construct_response(&data, response);
+                } else {
+                    printf("Failed to parse message: %s\n", buffer);
+                    strcpy(response, "Err!");
+                }
             }
 
             /* Send the response back to the client */
