@@ -29,7 +29,7 @@ void *start_controller()
     while(1)
     {
         double nivel = buffer_get(&nivel_ccb);
-        buffer_put(&nivel_ccb_graph, nivel);
+        //buffer_put(&nivel_ccb_graph, nivel);
         
         if(nivel != 0)
         {

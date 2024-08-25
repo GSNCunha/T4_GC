@@ -67,6 +67,7 @@ typedef struct {
 } circular_buffer_MessageData_client_receive;
 
 circular_buffer nivel_scb;
+circular_buffer nivel_scb_graph;
 circular_buffer tempo_scb;
 circular_buffer angleIn_scb;
 circular_buffer angleOut_scb;

@@ -56,9 +56,10 @@ void *simulate_plant() {
             }
         }
     buffer_put(&nivel_scb, 0.4);
+    /*buffer_put(&nivel_scb_graph, 0.4);
     buffer_put(&tempo_scb, 0);
     buffer_put(&angleIn_scb, 50);
-    buffer_put(&angleOut_scb, 50);
+    buffer_put(&angleOut_scb, 50);*/
 
     }
 
@@ -112,11 +113,13 @@ void *simulate_plant() {
     if(level >=1)
         level = 1;
     buffer_put(&nivel_scb, level);
-    //printf("nivel: %.2f", level);
-    //printf("\n");
-    buffer_put(&tempo_scb, simulationTime);
-    buffer_put(&angleIn_scb, anguloIn);
-    buffer_put(&angleOut_scb, get_angle_out(simulationTime));
+    //buffer_put(&nivel_scb_graph, level);
+    printf("nivel: %.2f", level);
+    printf("\n");
+    //fflush(stdout);
+    //buffer_put(&tempo_scb, simulationTime);
+    //buffer_put(&angleIn_scb, anguloIn);
+    //buffer_put(&angleOut_scb, get_angle_out(simulationTime));
 
     sleepMs(10);
 

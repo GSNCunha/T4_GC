@@ -76,6 +76,7 @@ typedef struct {
 
 // Global buffer instances
 extern circular_buffer nivel_scb;
+extern circular_buffer nivel_scb_graph;
 extern circular_buffer tempo_scb;
 extern circular_buffer angleIn_scb;
 extern circular_buffer angleOut_scb;
