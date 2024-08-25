@@ -3,6 +3,7 @@
         "buffer_code.h": "c",
         "pthread.h": "c",
         "in.h": "c",
-        "inet.h": "c"
+        "inet.h": "c",
+        "socket.h": "c"
     }
 }

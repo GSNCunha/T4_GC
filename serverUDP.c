@@ -116,6 +116,8 @@ int parse_message(const char *message, MessageData *data) {
 
 
 void construct_response(const MessageData *data, char *response) {
+     memset(response, 0, sizeof(response));
+
     if (strcmp(data->keyword, "OpenValve") == 0) {
         if (data->has_seq) {
             sprintf(response, "Open#%d!", data->seq);
@@ -129,9 +131,9 @@ void construct_response(const MessageData *data, char *response) {
             sprintf(response, "Err!");
         }
     } else if (strcmp(data->keyword, "GetLevel") == 0) {
-    double nivel_atual = 100*buffer_get(&nivel_scb);
+    int nivel_atual = 100*buffer_get(&nivel_scb);
 
-    sprintf(response, "Level#%d!", (int)nivel_atual);
+    sprintf(response, "Level#%d!", nivel_atual);
     } else if (strcmp(data->keyword, "CommTest") == 0) {
         sprintf(response, "Comm#OK!");
     } else if (strcmp(data->keyword, "SetMax") == 0) {

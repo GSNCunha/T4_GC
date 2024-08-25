@@ -32,7 +32,7 @@ typedef struct {
 
 typedef struct {
     char keyword[KEYWORD_SIZE];
-    int seq;
+    char seq[4];
     double value;
     bool has_seq;
     bool has_value;

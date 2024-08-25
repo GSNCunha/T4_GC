@@ -215,7 +215,7 @@ void *plot_graph() {
       tempo += 50;
             //buffer_put_string(&command_ccb,'GetNivel!');
             t = tempo/1000;
-            var_aux = 100*buffer_get(&nivel_ccb_graph);
+            var_aux = buffer_get(&nivel_ccb_graph);
             if(var_aux != 0)
               lvl = var_aux;
               var_aux = buffer_get(&angleIn_ccb);

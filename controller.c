@@ -6,7 +6,7 @@
 #include "buffer_code.h"
 #include "timer_utils.h"
 
-#define NIVEL_RP 0.8
+#define NIVEL_RP 80
 #define KP 10
 #define KI 1
 #define KD 3
@@ -25,13 +25,15 @@ void *start_controller()
     sleepMs(1000);
     buffer_put_string(&command_ccb, "OpenValve#001#50!");
     sleepMs(1000);
+
     while(1)
     {
         double nivel = buffer_get(&nivel_ccb);
         buffer_put(&nivel_ccb_graph, nivel);
+        
         if(nivel != 0)
         {
-            double erro = NIVEL_RP - nivel;
+            double erro = (NIVEL_RP - nivel)/100;
 
             // Proportional term
             double P_term = erro * KP;

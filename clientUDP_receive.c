@@ -66,7 +66,7 @@ void *start_udp_client_receive() {
     memset(&echoserver, 0, sizeof(echoserver));
     echoserver.sin_family = AF_INET;
     echoserver.sin_addr.s_addr = inet_addr("127.0.0.1");  // O endereço IP deve ser passado como uma string
-    echoserver.sin_port = htons(8080);
+    echoserver.sin_port = htons(8100);
 
     // Bind the socket to the server address
     if (bind(sock, (struct sockaddr *)&echoserver, sizeof(echoserver)) < 0) {
