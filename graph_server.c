@@ -224,7 +224,8 @@ void *plot_graph() {
             if(var_aux != 0)
               angleIn = var_aux;
             angleOut = buffer_get(&angleOut_scb);
-            if(t !=0)
+        }
+          if(t !=0)
             {
               datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
               //Código para testar no bitwise sem o graph:
@@ -236,7 +237,6 @@ void *plot_graph() {
               printf("angleOut: %.2f\n", angleOut);*/
               //------------------------------------------
             }
-        }
         if(buffer_get(&Start_scb) == 1)
         {
           buffer_put(&Start_scb, 0);

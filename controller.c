@@ -22,6 +22,7 @@ void *start_controller()
     buffer_put_string(&command_ccb, "SetMax#100!");
     sleepMs(1000);
     buffer_put_string(&command_ccb, "Start!");
+    //buffer_put(&Start_ccb, 1);
     sleepMs(1000);
     buffer_put_string(&command_ccb, "OpenValve#001#50!");
     sleepMs(1000);
