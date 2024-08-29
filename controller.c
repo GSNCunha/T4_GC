@@ -8,8 +8,8 @@
 
 #define NIVEL_RP 80
 #define KP 10
-#define KI 0.5
-#define KD 4
+#define KI 1
+#define KD 3
 #define M_PI 3.14159265358979323846
 
 void *start_controller()

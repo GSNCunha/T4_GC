@@ -90,7 +90,7 @@ void *start_udp_client(void *args) {
             }
 
             if (strncmp(buffer_send, "OpenValve#", 9) == 0) {
-                //printf("%s \n", buffer_send);
+                printf("%s \n", buffer_send);
                 char seq_str[10];
                 sscanf(buffer_send, "OpenValve#%[^#]", seq_str);
                 MessageData_client_receive message;
@@ -102,7 +102,7 @@ void *start_udp_client(void *args) {
                 add_message_to_array(&message, mensagens);
 
             } else if (strncmp(buffer_send, "CloseValve#", 10) == 0) {
-                //printf("%s \n", buffer_send);
+                printf("%s \n", buffer_send);
                 char seq_str[10];
                 sscanf(buffer_send, "CloseValve#%[^#]", seq_str);
 
@@ -215,7 +215,7 @@ void *start_udp_client(void *args) {
                             continue; // Continua para o próximo loop para evitar ficar preso nesse erro
                         }
 
-                       // printf("tentar mandar msg novamente %s %s \n", mensagens[x].keyword, mensagens[x].value);
+                        printf("tentar mandar msg novamente %s %s \n", mensagens[x].keyword, mensagens[x].value);
                         fflush(stdout);
 
                         // Reseta a estrutura de mensagem para evitar repetir o envio

@@ -14,7 +14,7 @@
 #define BUFFSIZE 255
 #define KEYWORD_SIZE 50
 #define RESPONSE_SIZE 10  // Assuming this size for the response string
-#define MESSAGE_HISTORY_SIZE 255
+#define MESSAGE_HISTORY_SIZE 255 
 
 char message_history[MESSAGE_HISTORY_SIZE][BUFFSIZE];
 int message_history_index = 0;
