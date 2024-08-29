@@ -19,6 +19,9 @@ void Die(char *mess) {
     perror(mess); 
     exit(1); 
 }
+void reset_message(MessageData_client_receive *msg) {
+    memset(msg, 0, sizeof(MessageData_client_receive));
+}
 
 MessageData_client_receive mensagens[MAX_MESSAGES];
 
@@ -193,16 +196,34 @@ void *start_udp_client(void *args) {
             // Remover mensagens que falharam em 20 conferências
             int x;
             for (x = 0; x < MAX_MESSAGES; x++) {
-                if (mensagens[x].num_conferencias >= 5) {
+                    if (mensagens[x].num_conferencias >= 5) {
 
-                echolen = strlen(mensagens[x].message);
-                if (sendto(sock, mensagens[x].message, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
-                    Die("Mismatch in number of sent bytes");
+                        echolen = strlen(mensagens[x].message);
+
+                        // Verifica se a mensagem não está vazia antes de tentar enviar
+                        if (echolen == 0) {
+                            printf("Mensagem vazia, não será enviada.\n");
+                            reset_message(&mensagens[x]);
+                            continue;
+                        }
+
+                        // Tenta enviar a mensagem
+                        if (sendto(sock, mensagens[x].message, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
+                            perror("Falha ao enviar mensagem");
+                            // Possível ação de recuperação ou retentativa pode ser implementada aqui
+                            continue; // Continua para o próximo loop para evitar ficar preso nesse erro
+                        }
+
+                        printf("tentar mandar msg novamente %s %s \n", mensagens[x].keyword, mensagens[x].value);
+                        fflush(stdout);
+
+                        // Reseta a estrutura de mensagem para evitar repetir o envio
+                        reset_message(&mensagens[x]);
+                    }
                 }
-                    memset(&mensagens[x], 0, sizeof(MessageData_client_receive));  // Limpa o slot
-                    printf("tentar mandar msg novamente \n");
-                }
-            }
+
+
+
         }
 
         sleepMs(10); // sleep 10ms
