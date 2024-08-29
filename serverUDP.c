@@ -14,7 +14,7 @@
 #define BUFFSIZE 255
 #define KEYWORD_SIZE 50
 #define RESPONSE_SIZE 10  // Assuming this size for the response string
-#define MESSAGE_HISTORY_SIZE 30
+#define MESSAGE_HISTORY_SIZE 255
 
 char message_history[MESSAGE_HISTORY_SIZE][BUFFSIZE];
 int message_history_index = 0;
@@ -213,6 +213,7 @@ void *start_server(void *args) {
             //printf("%s \n", buffer);
 
             if (strncmp(buffer, "OpenValve#", 10) == 0 || strncmp(buffer, "CloseValve#", 11) == 0) {
+                printf("%s \n", buffer);
                 if (is_message_in_history(buffer)) {
                     printf("Repeated message\n");
                     fflush(stdout);

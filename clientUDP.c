@@ -86,6 +86,7 @@ void *start_udp_client(void *args) {
             }
 
             if (strncmp(buffer_send, "OpenValve#", 9) == 0) {
+                printf("%s \n", buffer_send);
                 char seq_str[10];
                 sscanf(buffer_send, "OpenValve#%[^#]", seq_str);
                 MessageData_client_receive message;
@@ -97,6 +98,7 @@ void *start_udp_client(void *args) {
                 add_message_to_array(&message, mensagens);
 
             } else if (strncmp(buffer_send, "CloseValve#", 10) == 0) {
+                printf("%s \n", buffer_send);
                 char seq_str[10];
                 sscanf(buffer_send, "CloseValve#%[^#]", seq_str);
 
@@ -109,12 +111,6 @@ void *start_udp_client(void *args) {
                 add_message_to_array(&message, mensagens);
 
             } else if (strncmp(buffer_send, "GetLevel!", 9) == 0) {
-                MessageData_client_receive message;
-                strcpy(message.keyword, "GetLevel!");
-                strcpy(message.message, buffer_send);
-                message.num_conferencias = 0;
-
-                add_message_to_array(&message, mensagens);
 
             } else if (strncmp(buffer_send, "CommTest!", 9) == 0) {
                 MessageData_client_receive message;
@@ -174,13 +170,13 @@ void *start_udp_client(void *args) {
                 loop_de_conferencia("CloseValve#", numero_extraido);
 
             } else if (strncmp(buffer_receive, "Level#", 6) == 0) {
-                loop_de_conferencia("GetLevel!", NULL);
+                //loop_de_conferencia("GetLevel!", NULL);
                 char numero_extraido[10];
                 sscanf(buffer_receive, "Level#%[^!]!", numero_extraido);
                 int nivel = strtod(numero_extraido, NULL);
                 buffer_put(&nivel_ccb, nivel);
                 //printf("%s \n", buffer_receive);
-                fflush(stdout);
+                //fflush(stdout);
 
             } else if (strncmp(buffer_receive, "Comm#OK!", 8) == 0) {
                 loop_de_conferencia("CommTest!", NULL);
