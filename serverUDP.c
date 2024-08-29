@@ -214,7 +214,8 @@ void *start_server(void *args) {
 
             if (strncmp(buffer, "OpenValve#", 10) == 0 || strncmp(buffer, "CloseValve#", 11) == 0) {
                 if (is_message_in_history(buffer)) {
-                    //printf("Repeated message\n");
+                    printf("Repeated message\n");
+                    fflush(stdout);
                     MessageData data;
                     int var_aux = parse_message(buffer, &data);
                     if (var_aux == 0) {
