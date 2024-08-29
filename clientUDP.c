@@ -19,6 +19,7 @@ void Die(char *mess) {
     perror(mess); 
     exit(1); 
 }
+
 void reset_message(MessageData_client_receive *msg) {
     memset(msg, 0, sizeof(MessageData_client_receive));
 }
@@ -89,7 +90,7 @@ void *start_udp_client(void *args) {
             }
 
             if (strncmp(buffer_send, "OpenValve#", 9) == 0) {
-                printf("%s \n", buffer_send);
+                //printf("%s \n", buffer_send);
                 char seq_str[10];
                 sscanf(buffer_send, "OpenValve#%[^#]", seq_str);
                 MessageData_client_receive message;
@@ -101,7 +102,7 @@ void *start_udp_client(void *args) {
                 add_message_to_array(&message, mensagens);
 
             } else if (strncmp(buffer_send, "CloseValve#", 10) == 0) {
-                printf("%s \n", buffer_send);
+                //printf("%s \n", buffer_send);
                 char seq_str[10];
                 sscanf(buffer_send, "CloseValve#%[^#]", seq_str);
 
@@ -202,7 +203,7 @@ void *start_udp_client(void *args) {
 
                         // Verifica se a mensagem não está vazia antes de tentar enviar
                         if (echolen == 0) {
-                            printf("Mensagem vazia, não será enviada.\n");
+                           // printf("Mensagem vazia, não será enviada.\n");
                             reset_message(&mensagens[x]);
                             continue;
                         }
@@ -210,11 +211,11 @@ void *start_udp_client(void *args) {
                         // Tenta enviar a mensagem
                         if (sendto(sock, mensagens[x].message, echolen, 0, (struct sockaddr *)&echoserver, sizeof(echoserver)) != echolen) {
                             perror("Falha ao enviar mensagem");
-                            // Possível ação de recuperação ou retentativa pode ser implementada aqui
+                           
                             continue; // Continua para o próximo loop para evitar ficar preso nesse erro
                         }
 
-                        printf("tentar mandar msg novamente %s %s \n", mensagens[x].keyword, mensagens[x].value);
+                       // printf("tentar mandar msg novamente %s %s \n", mensagens[x].keyword, mensagens[x].value);
                         fflush(stdout);
 
                         // Reseta a estrutura de mensagem para evitar repetir o envio
