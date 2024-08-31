@@ -209,7 +209,7 @@ void reset_simulation(Tdataholder *data) {
 
 
 void *plot_graph() {
-  Tdataholder *data;
+  //Tdataholder *data;
   double t=0;
   double lvl;
   double angleIn;
@@ -217,7 +217,7 @@ void *plot_graph() {
   double var_aux;
   struct timespec t_spec;
 
-  data = datainit(640,480,120,110,45,0,0);
+  //data = datainit(640,480,120,110,45,0,0);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec);
     while (1) {
@@ -236,7 +236,7 @@ void *plot_graph() {
         }
           if(t !=0)
             {
-              datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
+              //datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
               //Código para testar no bitwise sem o graph:
               /*
               fflush(stdout);
@@ -244,13 +244,14 @@ void *plot_graph() {
               printf("tempo: %.2f\n", t);
               printf("nivel: %.2f\n", lvl);
               printf("angleIn: %.2f\n", angleIn);
-              printf("angleOut: %.2f\n", angleOut);*/
+              printf("angleOut: %.2f\n", angleOut);
+	      */
               //------------------------------------------
             }
         if(buffer_get(&Start_scb) == 1)
         {
           buffer_put(&Start_scb, 0);
-          reset_simulation(data);
+          //reset_simulation(data);
         }
     }
 

@@ -13,10 +13,10 @@
 #include "buffer_code.h"
 
 #define BUFFSIZE 255
-#define MAX_MESSAGES 250
+#define MAX_MESSAGES 2000
 #define KEYWORD_SIZE 50
 #define CLIENT_UDP_PERIOD 10
-#define RETRY_PERIOD 50 //ms
+#define RETRY_PERIOD 200 //ms
 
 void Die(char *mess) { 
     perror(mess); 
@@ -35,12 +35,12 @@ void loop_de_conferencia(char *keyword, char *value) {
         if (strncmp(mensagens[x].keyword, keyword, strlen(keyword)) == 0) {
             if (value != NULL) {
                 if (atoi(mensagens[x].value) == atoi(value)) {
-                    memset(&mensagens[x], '\0', sizeof(MessageData_client_receive));
+                    memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
                     //printf("mensagem conferida %s \n", keyword);
                     break;
                 }
             } else {
-                memset(&mensagens[x], '\0', sizeof(MessageData_client_receive));
+                memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
                 //printf("mensagem conferida %s \n", keyword);
                 break;
             }
@@ -52,7 +52,7 @@ void loop_de_conferencia(char *keyword, char *value) {
 void add_message_to_array(MessageData_client_receive *mensagem, MessageData_client_receive array[MAX_MESSAGES]) {
     int i;
     for (i = 0; i < MAX_MESSAGES; i++) {
-        if (array[i].keyword[0] == '\0') {  // Verifica se a posição está vazia
+        if (array[i].keyword[0] == 0) {  // Verifica se a posição está vazia
             array[i] = *mensagem;
             break;
         }
