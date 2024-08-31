@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <math.h>
@@ -6,6 +7,7 @@
 
 #define SCREEN_W 640 //tamanho da janela que sera criada
 #define SCREEN_H 640
+#define GRAPH_CLIENT_PERIOD 50 //50ms
 
 //#define BPP 8
 //typedef Uint8 PixelType;
@@ -208,11 +210,14 @@ void *plot_graph() {
   double angleIn =50+100*0.5;
   double tempo = 0;
   double var_aux;
+  struct timespec t_spec;
 
   data = datainit(640,480,120,110,45,0,0);
-
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec);
     while (1) {
-      tempo += 1.5*50;
+      while ((get_elapsed_time_ms(t_spec)) < GRAPH_CLIENT_PERIOD); //verifica se ja se passou o periodo da planta
+        tempo += (double)get_elapsed_time_ms(t_spec);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec);
             t = tempo/1000;
             var_aux = buffer_get(&nivel_ccb_graph);
             if(var_aux != 0)
@@ -228,15 +233,12 @@ void *plot_graph() {
             printf("nivel: %.2f\n", lvl);
             printf("angleIn: %.2f\n", angleIn);*/
             //-------------------------------------------
-
-        
         if(buffer_get(&Start_ccb_graph) == 1)
         {
           tempo = 0;
           buffer_put(&Start_ccb_graph, 0);
           reset_simulation(data);
         }
-        sleepMs(50);
     }
 
 

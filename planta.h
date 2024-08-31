@@ -1,6 +1,6 @@
 #ifndef PLANT_SIMULATION_H
 #define PLANT_SIMULATION_H
-
+#define _POSIX_C_SOURCE 200809L
 #include <math.h>
 #include <stdio.h>
 #include <time.h>

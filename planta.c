@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <math.h>
 #include <stdio.h>
 #include <time.h>
@@ -11,6 +12,7 @@
 #define M_PI 3.14159265358979323846
 #define PLANT_PERIOD 10
 
+
 double delta;
 double max = 100;
 double level = 0.4;
@@ -20,6 +22,7 @@ double dT = 10; //em ms
 double fluxIn;
 double fluxOut;
 long simulationTime = 0;
+struct timespec t;
 
 
 clock_t startSimulationTime;
@@ -38,13 +41,11 @@ void *simulate_plant() {
 
     //catches the start of the simulation:
     simulationTime = 0; // em ms
-    startSimulationTime = clock(); //pega o clock do inicio
     buffer_put(&Start_scb, 0);
     
-        while(1)
+    while(1) //esse while aqui ta suspeito sepa da p tirar
     {
         MessageData DataReceived;
-
         DataReceived = buffer_get_MessageData(&messageData_scb);
         if (strlen(DataReceived.keyword) > 0) {  // Ensure the keyword is not empty
             if (strcmp(DataReceived.keyword, "Start") == 0) {
@@ -55,72 +56,70 @@ void *simulate_plant() {
                 break;
             }
         }
-    buffer_put(&nivel_scb, 0.4);
-    buffer_put(&nivel_scb_graph, 0.4);
-    buffer_put(&tempo_scb, 0);
-    buffer_put(&angleIn_scb, 50);
-    buffer_put(&angleOut_scb, 50);
-
+        buffer_put(&nivel_scb, 0.4);
+        buffer_put(&nivel_scb_graph, 0.4);
+        buffer_put(&tempo_scb, 0);
+        buffer_put(&angleIn_scb, 50);
+        buffer_put(&angleOut_scb, 50);
     }
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t);
     while (1) {
+        while ((get_elapsed_time_ms(t)) < PLANT_PERIOD); //verifica se ja se passou o periodo da planta
+        simulationTime += (long)get_elapsed_time_ms(t);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &t);
+        //printf("tempo: %ld" ,simulationTime);
+        MessageData DataReceived;
+        DataReceived = buffer_get_MessageData(&messageData_scb);
 
-    MessageData DataReceived;
 
-    DataReceived = buffer_get_MessageData(&messageData_scb);
-
-
-    if (strlen(DataReceived.keyword) > 0) {  // Ensure the keyword is not empty
-        if (strcmp(DataReceived.keyword, "OpenValve") == 0) {
-            delta += DataReceived.value;
-        } else if (strcmp(DataReceived.keyword, "CloseValve") == 0) {
-            delta -= DataReceived.value;
-        } else if (strcmp(DataReceived.keyword, "SetMax") == 0) {
-            max = DataReceived.value;
-        } else if (strcmp(DataReceived.keyword, "GetLevel") == 0) {
-            // resposta foi dada em serverUDP
-        } else if (strcmp(DataReceived.keyword, "Start") == 0) {
-            anguloIn = 50;
-            level = 0.4;
-            simulationTime = 0;
-            buffer_put(&Start_scb, 1);
+        if (strlen(DataReceived.keyword) > 0) {  // Ensure the keyword is not empty
+            if (strcmp(DataReceived.keyword, "OpenValve") == 0) {
+                delta += DataReceived.value;
+            } else if (strcmp(DataReceived.keyword, "CloseValve") == 0) {
+                delta -= DataReceived.value;
+            } else if (strcmp(DataReceived.keyword, "SetMax") == 0) {
+                max = DataReceived.value;
+            } else if (strcmp(DataReceived.keyword, "GetLevel") == 0) {
+                // resposta foi dada em serverUDP
+            } else if (strcmp(DataReceived.keyword, "Start") == 0) {
+                anguloIn = 50;
+                level = 0.4;
+                simulationTime = 0;
+                buffer_put(&Start_scb, 1);
+            }
         }
-    }
 
-    if(delta >0)
-    {   
-        if (delta < 0.01 * dT) {
-            anguloIn = anguloIn + delta;
-            delta = 0;
-        } else {
-            anguloIn = anguloIn + 0.01 * dT;
-            delta -= 0.01 * dT;
+        if(delta >0)
+        {   
+            if (delta < 0.01 * dT) {
+                anguloIn = anguloIn + delta;
+                delta = 0;
+            } else {
+                anguloIn = anguloIn + 0.01 * dT;
+                delta -= 0.01 * dT;
+            }
+        }else if(delta <0)
+        {
+            if (delta > -0.01 * dT) {
+                anguloIn = anguloIn + delta;
+                delta = 0;
+            } else {
+                anguloIn = anguloIn - 0.01 * dT;
+                delta += 0.01 * dT;
+            }
         }
-    }else if(delta <0)
-    {
-        if (delta > -0.01 * dT) {
-            anguloIn = anguloIn + delta;
-            delta = 0;
-        } else {
-            anguloIn = anguloIn - 0.01 * dT;
-            delta += 0.01 * dT;
-        }
-    }
-    //printf("anguloIn: %.2f", anguloIn);
-    fluxIn = 1 * sin(M_PI / 2 * anguloIn / 100);
-    fluxOut = (max / 100) * (level / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
-    level = level + (0.00002 * dT * (fluxIn - fluxOut));
-    if(level >=1)
-        level = 1;
-    buffer_put(&nivel_scb, level);
-    buffer_put(&nivel_scb_graph, level);
-    buffer_put(&tempo_scb, simulationTime);
-    buffer_put(&angleIn_scb, anguloIn);
-    buffer_put(&angleOut_scb, get_angle_out(simulationTime));
-
-    sleepMs(10);
-
-    simulationTime += PLANT_PERIOD;
+        //printf("anguloIn: %.2f", anguloIn);
+        fluxIn = 1 * sin(M_PI / 2 * anguloIn / 100);
+        fluxOut = (max / 100) * (level / 1.25 + 0.2) * sin(M_PI / 2 *  get_angle_out(simulationTime) / 100);
+        level = level + (0.00002 * dT * (fluxIn - fluxOut));
+        if(level >=1)
+            level = 1;
+        buffer_put(&nivel_scb, level);
+        buffer_put(&nivel_scb_graph, level);
+        buffer_put(&tempo_scb, simulationTime);
+        buffer_put(&angleIn_scb, anguloIn);
+        buffer_put(&angleOut_scb, get_angle_out(simulationTime));
     }
 }
 

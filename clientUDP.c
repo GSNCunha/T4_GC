@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -14,6 +15,7 @@
 #define BUFFSIZE 255
 #define MAX_MESSAGES 250
 #define KEYWORD_SIZE 50
+#define CLIENT_UDP_PERIOD 10
 
 void Die(char *mess) { 
     perror(mess); 
@@ -65,6 +67,7 @@ void *start_udp_client(void *args) {
     char buffer_receive[BUFFSIZE];
     int received = 0;
     unsigned int echolen, clientlen;
+    struct timespec t_spec;
 
     // Extract IP and port from arguments
     char **argv = (char **)args;
@@ -81,7 +84,11 @@ void *start_udp_client(void *args) {
     echoserver.sin_port = htons(atoi(argv[1]));
 
     char command[50];
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec);
     while (1) {
+        while ((get_elapsed_time_ms(t_spec)) < CLIENT_UDP_PERIOD); //verifica se ja se passou o periodo
+        clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec); //reseta o tempo inicial
+
 
         if (buffer_get_string(&command_ccb, buffer_send)) {
             echolen = strlen(buffer_send);
