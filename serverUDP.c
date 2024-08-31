@@ -213,7 +213,7 @@ void *start_server(void *args) {
             //printf("%s \n", buffer);
 
             if (strncmp(buffer, "OpenValve#", 10) == 0 || strncmp(buffer, "CloseValve#", 11) == 0) {
-                //printf("%s \n", buffer);
+                printf("%s \n", buffer);
                 if (is_message_in_history(buffer)) {
                     //printf("Repeated message\n");
                     fflush(stdout);

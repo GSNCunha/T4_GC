@@ -238,7 +238,8 @@ void *plot_graph() {
             {
               datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
               //Código para testar no bitwise sem o graph:
-              /*fflush(stdout);
+              /*
+              fflush(stdout);
               system("clear");
               printf("tempo: %.2f\n", t);
               printf("nivel: %.2f\n", lvl);

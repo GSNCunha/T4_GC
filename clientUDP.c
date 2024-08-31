@@ -16,6 +16,7 @@
 #define MAX_MESSAGES 250
 #define KEYWORD_SIZE 50
 #define CLIENT_UDP_PERIOD 10
+#define RETRY_PERIOD 50 //ms
 
 void Die(char *mess) { 
     perror(mess); 
@@ -34,12 +35,12 @@ void loop_de_conferencia(char *keyword, char *value) {
         if (strncmp(mensagens[x].keyword, keyword, strlen(keyword)) == 0) {
             if (value != NULL) {
                 if (atoi(mensagens[x].value) == atoi(value)) {
-                    memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
+                    memset(&mensagens[x], '\0', sizeof(MessageData_client_receive));
                     //printf("mensagem conferida %s \n", keyword);
                     break;
                 }
             } else {
-                memset(&mensagens[x], 0, sizeof(MessageData_client_receive));
+                memset(&mensagens[x], '\0', sizeof(MessageData_client_receive));
                 //printf("mensagem conferida %s \n", keyword);
                 break;
             }
@@ -68,6 +69,8 @@ void *start_udp_client(void *args) {
     int received = 0;
     unsigned int echolen, clientlen;
     struct timespec t_spec;
+    struct timespec t_spec_retry;
+
 
     // Extract IP and port from arguments
     char **argv = (char **)args;
@@ -85,6 +88,7 @@ void *start_udp_client(void *args) {
 
     char command[50];
     clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec_retry);
     while (1) {
         while ((get_elapsed_time_ms(t_spec)) < CLIENT_UDP_PERIOD); //verifica se ja se passou o periodo
         clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec); //reseta o tempo inicial
@@ -202,9 +206,13 @@ void *start_udp_client(void *args) {
             }
 
             // Remover mensagens que falharam em 20 conferências
+
+            if((get_elapsed_time_ms(t_spec_retry)) >= RETRY_PERIOD){ //verifica se ja se passou o periodo
+            clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec_retry); //reseta o tempo inicial
+
             int x;
             for (x = 0; x < MAX_MESSAGES; x++) {
-                    if (mensagens[x].num_conferencias >= 5) {
+                    if (mensagens[x].num_conferencias >= 0) {
 
                         echolen = strlen(mensagens[x].message);
 
@@ -221,14 +229,15 @@ void *start_udp_client(void *args) {
                            
                             continue; // Continua para o próximo loop para evitar ficar preso nesse erro
                         }
-
+                        //fflush(stdout);
                         printf("tentar mandar msg novamente %s %s \n", mensagens[x].keyword, mensagens[x].value);
-                        fflush(stdout);
 
                         // Reseta a estrutura de mensagem para evitar repetir o envio
-                        reset_message(&mensagens[x]);
+                        //reset_message(&mensagens[x]);
                     }
+                    
                 }
+            }
 
 
 

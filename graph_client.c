@@ -227,11 +227,13 @@ void *plot_graph() {
               angleIn = var_aux;
             datadraw(data, t, (double)lvl, (double)angleIn);
             //Código pra testar no bitwise sem a parte gráfica:
-            /*fflush(stdout);
+            /*
+            fflush(stdout);
             system("clear");
             printf("tempo: %.2f\n", t);
             printf("nivel: %.2f\n", lvl);
-            printf("angleIn: %.2f\n", angleIn);*/
+            printf("angleIn: %.2f\n", angleIn);
+            */
             //-------------------------------------------
         if(buffer_get(&Start_ccb_graph) == 1)
         {
