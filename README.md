@@ -57,3 +57,10 @@ The goal of the control system is to maintain the tank level at 80%, with a maxi
 
 The plant model simulates the behavior of the tank’s input and output flow, adjusting the tank level based on valve control and flow rates over time.
 
+## Packet Loss Management
+
+The project was implemented on a channel with a high packet loss rate. To handle this, the system was designed to ensure message reliability by:
+
+- Storing sent messages and waiting for acknowledgment from the server.
+- Checking the response for each sent message to confirm the execution of commands.
+- Resending messages when acknowledgments were not received within a specific time frame, ensuring no command was lost due to network issues.
