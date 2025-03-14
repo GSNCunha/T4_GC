@@ -6,7 +6,7 @@
 #include "buffer_code.h"
 #include "timer_utils.h"
 
-#define NIVEL_RP 0.8
+#define NIVEL_RP 80
 #define KP 10
 #define KI 1
 #define KD 3
@@ -20,18 +20,21 @@ void *start_controller()
     char buffer[100];
 
     buffer_put_string(&command_ccb, "SetMax#100!");
-    sleepMs(1000);
+    //sleepMs(1000);
     buffer_put_string(&command_ccb, "Start!");
-    sleepMs(1000);
-    buffer_put_string(&command_ccb, "OpenValve#000#30!");
-    sleepMs(1000);
+    //buffer_put(&Start_ccb, 1);
+    //sleepMs(1000);
+    buffer_put_string(&command_ccb, "OpenValve#001#50!");
+    //sleepMs(1000);
+
     while(1)
     {
         double nivel = buffer_get(&nivel_ccb);
         buffer_put(&nivel_ccb_graph, nivel);
+        
         if(nivel != 0)
         {
-            double erro = NIVEL_RP - nivel;
+            double erro = (NIVEL_RP - nivel)/100;
 
             // Proportional term
             double P_term = erro * KP;
@@ -64,14 +67,14 @@ void *start_controller()
             }
 
             double Ang_saida = asin(Sinal_controle) * (200 / M_PI);
-            Ang_saida = round(Ang_saida * 100.0) / 100.0;
+            Ang_saida = round(Ang_saida);
             /*if(fabs(sin(M_PI / 2 * Ang_saida  / 100) - sin(M_PI / 2 * Ang_saida_anterior / 100)) > 0.2)
             {
                 Ang_saida = Ang_saida_anterior;
             }*/
             double delta;
 
-                delta = Ang_saida - Ang_saida_anterior;
+                delta =(int) (Ang_saida - Ang_saida_anterior);
                 
 
             char seq_str[4]; // To store the sequence as a string
@@ -81,7 +84,7 @@ void *start_controller()
             // Convert seq and buffer_delta to strings
             sprintf(seq_str, "%d", seq);
             memset(buffer_delta_str, 0, sizeof(buffer_delta_str)); // Reset buffer
-            sprintf(buffer_delta_str, "%.2f", fabs(delta));
+            sprintf(buffer_delta_str, "%d", (int)fabs(delta));
            // printf("angulo de entrada: %.2f", Ang_saida);
            // printf("\n");
 
@@ -107,8 +110,7 @@ void *start_controller()
             Ang_saida_anterior = Ang_saida;
             erro_anterior = erro;
         }
-            sleepMs(100);
             buffer_put_string(&command_ccb, "GetLevel!");
-            sleepMs(800);
+            sleepMs(1000);
     }
 }

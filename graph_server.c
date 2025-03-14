@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <math.h>
@@ -7,6 +8,7 @@
 #define SCREEN_W 640 //tamanho da janela que sera criada
 #define SCREEN_H 640
 #define M_PI 3.14159265358979323846
+#define GRAPH_SERVER_PERIOD 50 //50ms
 
 //#define BPP 8
 //typedef Uint8 PixelType;
@@ -207,35 +209,50 @@ void reset_simulation(Tdataholder *data) {
 
 
 void *plot_graph() {
-  Tdataholder *data;
+  //Tdataholder *data;
   double t=0;
   double lvl;
   double angleIn;
   double angleOut;
   double var_aux;
+  struct timespec t_spec;
 
-  data = datainit(640,480,120,110,45,0,0);
+  //data = datainit(640,480,120,110,45,0,0);
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec);
     while (1) {
-        while (nivel_scb.count > 0 || tempo_scb.count > 0 || angleIn_scb.count > 0 || angleOut_scb.count > 0) {
+        while ((get_elapsed_time_ms(t_spec)) < GRAPH_SERVER_PERIOD); //verifica se ja se passou o periodo
+        clock_gettime(CLOCK_MONOTONIC_RAW, &t_spec);
+
+
+
+        while (nivel_scb_graph.count > 0 && tempo_scb.count > 0 && angleIn_scb.count > 0 && angleOut_scb.count > 0) {
             t = buffer_get(&tempo_scb) / 1000;
-            lvl = 100*buffer_get(&nivel_scb);
+            lvl = 100*buffer_get(&nivel_scb_graph);
             var_aux = buffer_get(&angleIn_scb);
             if(var_aux != 0)
               angleIn = var_aux;
             angleOut = buffer_get(&angleOut_scb);
-            if(t !=0)
-            {
-              datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
-            }
-            
         }
+          if(t !=0)
+            {
+              //datadraw(data, t, (double)lvl, (double)angleIn, (double)angleOut);
+              //Código para testar no bitwise sem o graph:
+              /*
+              fflush(stdout);
+              system("clear");
+              printf("tempo: %.2f\n", t);
+              printf("nivel: %.2f\n", lvl);
+              printf("angleIn: %.2f\n", angleIn);
+              printf("angleOut: %.2f\n", angleOut);
+	      */
+              //------------------------------------------
+            }
         if(buffer_get(&Start_scb) == 1)
         {
           buffer_put(&Start_scb, 0);
-          reset_simulation(data);
+          //reset_simulation(data);
         }
-        sleepMs(50);
     }
 
 

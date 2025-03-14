@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "buffer_code.h": "c",
+        "pthread.h": "c",
+        "in.h": "c",
+        "inet.h": "c",
+        "socket.h": "c",
+        "time.h": "c",
+        "timer_utils.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "unistd.h": "c",
+        "math.h": "c"
+    }
+}

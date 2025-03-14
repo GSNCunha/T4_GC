@@ -27,6 +27,7 @@ int main(int argc, char *argv[]){
     buffer_init(&Start_ccb_graph); //clientUDP - > graph_client
     buffer_init(&delta_ccb); //clientUDP - > graph_client
     buffer_init_string(&command_ccb); //controle - > clientUDP
+    buffer_init_MessageData_client_receive(&messageData_client_receive_ccb);
     //buffer_init_MessageData(&command_ccb);
 
     pthread_create(&graph_client, NULL, plot_graph, NULL);
@@ -46,13 +47,18 @@ int main(int argc, char *argv[]){
             break;
             //fechar o bgl todo
         }
-
-        buffer_put_string(&command_ccb,buffer);
     }
+
+    pthread_cancel(graph_client);
+    pthread_cancel(udp_client);
+    pthread_cancel(controller_client);
 
     pthread_join(graph_client, NULL);
     pthread_join(udp_client, NULL);
     pthread_join(controller_client, NULL);
+    system("clear");
+    printf("Client closed!\n");
+
 
     return 0;
 }
